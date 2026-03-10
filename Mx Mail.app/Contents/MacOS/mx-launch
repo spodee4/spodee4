@@ -36,9 +36,19 @@ if lsof -i :"$MX_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     exit 0
 fi
 
-# Start the server
+# Ensure dependencies are installed
 cd "$MX_DIR" || exit 1
-$NODE server/index.js > "$LOG_FILE" 2>&1 &
+NPM=$(which npm 2>/dev/null || echo "/opt/homebrew/bin/npm")
+if [ ! -d "$MX_DIR/node_modules" ]; then
+    osascript -e 'display notification "Installing dependencies…" with title "Mx Mail" subtitle "First launch setup"'
+    $NPM install --production >> "$LOG_FILE" 2>&1
+fi
+
+# Set port via env so server uses it
+export PORT="$MX_PORT"
+
+# Start the server
+$NODE server/index.js >> "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 echo "$SERVER_PID" > "$PID_FILE"
 
