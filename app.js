@@ -153,12 +153,85 @@ Amazon Web Services`,
       starred: true,
       folder: "inbox",
     },
+    {
+      id: 6,
+      from: "Indie Hackers <digest@indiehackers.com>",
+      to: "me@spodee.mail",
+      subject: "Weekly Digest: Top stories from the community",
+      body: `This week on Indie Hackers:
+
+1. "How I grew my SaaS to $10K MRR in 6 months" — @buildinpublic
+2. "The SEO strategy that tripled our organic traffic" — @growthhacker
+3. "Why I switched from React to HTMX" — @backtobasics
+
+Plus: New milestone posts, AMA with a bootstrapped founder, and community discussion on pricing strategies.
+
+Read more at indiehackers.com
+
+To unsubscribe from this digest, click here.`,
+      date: "2026-03-07T14:00:00",
+      read: true,
+      starred: false,
+      folder: "inbox",
+    },
+    {
+      id: 7,
+      from: "Lisa Park <lisa@clientco.com>",
+      to: "me@spodee.mail",
+      subject: "Re: Project timeline update",
+      body: `Hi,
+
+Thanks for the update on the timeline. We're aligned on the new dates. I've shared the revised schedule with our team.
+
+One thing — we're still waiting on the API documentation from your side. Could you have someone send that over by Wednesday?
+
+Otherwise, everything looks good to proceed.
+
+Best,
+Lisa`,
+      date: "2026-03-09T10:20:00",
+      read: false,
+      starred: false,
+      folder: "inbox",
+    },
+    {
+      id: 8,
+      from: "Stripe <receipts@stripe.com>",
+      to: "me@spodee.mail",
+      subject: "Your receipt from Spodee Inc — $299.00",
+      body: `Receipt from Stripe
+
+Amount: $299.00
+Date: March 7, 2026
+Description: Pro Plan — Monthly subscription
+Card: Visa ending in 4242
+
+If you have questions about this charge, contact support@spodee.mail
+
+Thanks for your business!
+Stripe`,
+      date: "2026-03-07T09:00:00",
+      read: true,
+      starred: false,
+      folder: "inbox",
+    },
   ];
+
+  // ---------- Category Config (Dan Martel Email GPS) ----------
+  const CATEGORIES = {
+    respond:    { label: "Respond",    color: "#e74c5c", icon: "!" },
+    review:     { label: "Review",     color: "#fdcb6e", icon: "?" },
+    waiting:    { label: "Waiting On", color: "#00cec9", icon: "\u23F3" },
+    receipts:   { label: "Receipts",   color: "#a29bfe", icon: "$" },
+    newsletter: { label: "Newsletter", color: "#636e72", icon: "\u2709" },
+    fyi:        { label: "FYI",        color: "#55efc4", icon: "i" },
+  };
 
   // ---------- State ----------
   const state = {
     emails: JSON.parse(JSON.stringify(sampleEmails)),
     activeFolder: "inbox",
+    activeCategory: "all",
     selectedId: null,
     searchQuery: "",
     filterMode: "all",
@@ -212,6 +285,10 @@ Amazon Web Services`,
     inboxCount: $("#inbox-count"),
     // Detail panel
     detailPanel: $("#detail-panel"),
+    // Triage
+    triageAllBtn: $("#triage-all-btn"),
+    triageCategories: $$("#triage-categories .triage-cat"),
+    detailCategoryBar: $("#detail-category-bar"),
   };
 
   // ---------- Helpers ----------
@@ -231,6 +308,11 @@ Amazon Web Services`,
   function getVisibleEmails() {
     let emails = state.emails.filter((e) => e.folder === state.activeFolder);
 
+    // Category filter (Email GPS)
+    if (state.activeCategory && state.activeCategory !== "all") {
+      emails = emails.filter((e) => e.category === state.activeCategory);
+    }
+
     if (state.searchQuery) {
       const q = state.searchQuery.toLowerCase();
       emails = emails.filter(
@@ -247,7 +329,15 @@ Amazon Web Services`,
       emails = emails.filter((e) => e.read);
     }
 
-    emails.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort: respond first, then by date
+    const catPriority = { respond: 0, review: 1, waiting: 2, fyi: 3, receipts: 4, newsletter: 5 };
+    emails.sort((a, b) => {
+      const pa = catPriority[a.category] ?? 3;
+      const pb = catPriority[b.category] ?? 3;
+      if (pa !== pb) return pa - pb;
+      return new Date(b.date) - new Date(a.date);
+    });
+
     return emails;
   }
 
@@ -275,6 +365,10 @@ Amazon Web Services`,
       if (!email.read) li.classList.add("unread");
       if (email.id === state.selectedId) li.classList.add("active");
 
+      const catTag = email.category
+        ? `<span class="mail-item-category" data-cat="${email.category}">${CATEGORIES[email.category]?.label || email.category}</span>`
+        : "";
+
       li.innerHTML = `
         <div class="mail-item-row">
           <span class="mail-item-from">${escapeHtml(email.from.split("<")[0].trim())}</span>
@@ -284,7 +378,10 @@ Amazon Web Services`,
           <span class="mail-item-subject">${escapeHtml(email.subject)}</span>
           <span class="mail-item-star ${email.starred ? "starred" : ""}" data-id="${email.id}">&#9733;</span>
         </div>
-        <span class="mail-item-snippet">${escapeHtml(email.body.substring(0, 80))}...</span>
+        <div class="mail-item-row">
+          <span class="mail-item-snippet">${escapeHtml(email.body.substring(0, 80))}...</span>
+          ${catTag}
+        </div>
       `;
 
       li.addEventListener("click", (e) => {
@@ -319,6 +416,14 @@ Amazon Web Services`,
     dom.detailBody.textContent = email.body;
     dom.starBtn.innerHTML = email.starred ? "&#9733; Starred" : "&#9734; Star";
     dom.starBtn.style.color = email.starred ? "var(--star)" : "";
+
+    // Show category tag
+    if (email.category && CATEGORIES[email.category]) {
+      const cat = CATEGORIES[email.category];
+      dom.detailCategoryBar.innerHTML = `<span class="detail-cat-tag mail-item-category" data-cat="${email.category}">${cat.icon} ${cat.label}</span>`;
+    } else {
+      dom.detailCategoryBar.innerHTML = "";
+    }
 
     dom.aiResult.classList.add("hidden");
     dom.aiResult.textContent = "";
@@ -698,6 +803,162 @@ Amazon Web Services`,
     if (e.key === "Enter") handleAiChat();
   });
 
+  // ---------- AI Triage Engine (Dan Martel Email GPS) ----------
+  const triageEngine = {
+    categorize(email) {
+      const from = email.from.toLowerCase();
+      const subject = email.subject.toLowerCase();
+      const body = email.body.toLowerCase();
+
+      // Receipts: billing, invoices, payments, financial
+      if (
+        /receipt|invoice|billing|statement|payment|charge|subscription|stripe|paypal/.test(subject + " " + body) ||
+        /no-reply|noreply|receipts@|billing@|payments@/.test(from)
+      ) {
+        return "receipts";
+      }
+
+      // Newsletter: has unsubscribe, digest, weekly, from known newsletter senders
+      if (
+        /unsubscribe|digest|weekly|newsletter|roundup/.test(body) ||
+        /newsletter|digest|weekly|substack|mailchimp/.test(from)
+      ) {
+        return "newsletter";
+      }
+
+      // Waiting On: we sent something and they're replying with "waiting", or thread where we need follow-up
+      if (
+        /waiting on|waiting for|pending|follow up|following up|circle back/.test(body) &&
+        /could you|can you|send.*over|by (monday|tuesday|wednesday|thursday|friday|end of|eod|eow)/.test(body)
+      ) {
+        return "waiting";
+      }
+
+      // Respond: direct questions, requests for action, asks for reply
+      if (
+        /\?/.test(subject) ||
+        /(could you|can you|would you|please.*send|please.*review|please.*confirm|let me know|what do you think|your thoughts|hop on a call|schedule|rsvp|action required)/i.test(body)
+      ) {
+        return "respond";
+      }
+
+      // Review: PRs, docs to review, FYI with substance, reports
+      if (
+        /pull request|review|pr #|needs.review|code review|please review|take a look/.test(subject + " " + body) ||
+        /roadmap|update|report|summary|highlights|key changes/.test(body)
+      ) {
+        return "review";
+      }
+
+      // FYI: informational, automated notifications, status updates
+      return "fyi";
+    },
+
+    async triageAll(emails) {
+      const toTriage = emails.filter(
+        (e) => e.folder === "inbox" && !e.category
+      );
+      for (let i = 0; i < toTriage.length; i++) {
+        await delay(200); // Simulate AI processing per email
+        toTriage[i].category = this.categorize(toTriage[i]);
+      }
+      return toTriage.length;
+    },
+
+    async triageOne(email) {
+      await delay(150);
+      email.category = this.categorize(email);
+      return email.category;
+    },
+  };
+
+  function updateCategoryCounts() {
+    const inbox = state.emails.filter((e) => e.folder === "inbox");
+    const counts = { all: inbox.length };
+    Object.keys(CATEGORIES).forEach((cat) => {
+      counts[cat] = inbox.filter((e) => e.category === cat).length;
+    });
+
+    Object.entries(counts).forEach(([cat, count]) => {
+      const badge = document.getElementById(`cat-${cat}-count`);
+      if (badge) {
+        badge.textContent = count;
+        badge.classList.toggle("hidden", count === 0);
+      }
+    });
+  }
+
+  // ---------- Triage Event Listeners ----------
+
+  // Triage All button
+  dom.triageAllBtn.addEventListener("click", async () => {
+    dom.triageAllBtn.disabled = true;
+    dom.triageAllBtn.innerHTML = '<span class="ai-loading"></span> Triaging...';
+    const count = await triageEngine.triageAll(state.emails);
+    dom.triageAllBtn.innerHTML = "&#10024; Triage Inbox";
+    dom.triageAllBtn.disabled = false;
+    updateCategoryCounts();
+    renderMailList();
+    // Notify via AI chat
+    addAiMessage(
+      `Triaged ${count} email(s). Categories: ` +
+        Object.keys(CATEGORIES)
+          .map((c) => {
+            const n = state.emails.filter(
+              (e) => e.folder === "inbox" && e.category === c
+            ).length;
+            return n > 0 ? `${CATEGORIES[c].label}: ${n}` : null;
+          })
+          .filter(Boolean)
+          .join(", "),
+      "assistant"
+    );
+  });
+
+  // Category filter clicks
+  dom.triageCategories.forEach((el) => {
+    el.addEventListener("click", () => {
+      dom.triageCategories.forEach((c) => c.classList.remove("active"));
+      el.classList.add("active");
+      state.activeCategory = el.dataset.category;
+
+      // Switch to inbox when filtering by category
+      if (state.activeFolder !== "inbox") {
+        state.activeFolder = "inbox";
+        dom.folders.forEach((f) => f.classList.remove("active"));
+        document
+          .querySelector('[data-folder="inbox"]')
+          .classList.add("active");
+      }
+      state.selectedId = null;
+      showPanel("empty");
+      renderMailList();
+    });
+  });
+
+  // ---------- macOS Share Target Handling ----------
+  function handleShareTarget() {
+    const params = new URLSearchParams(window.location.search);
+    const sharedTitle = params.get("title");
+    const sharedText = params.get("text");
+    const sharedUrl = params.get("url");
+
+    if (sharedTitle || sharedText || sharedUrl) {
+      // Open compose with shared content
+      let body = "";
+      if (sharedText) body += sharedText;
+      if (sharedUrl) body += (body ? "\n\n" : "") + sharedUrl;
+
+      dom.composeTo.value = "";
+      dom.composeSubject.value = sharedTitle || "Shared content";
+      dom.composeBody.value = body;
+      showPanel("compose");
+
+      // Clean URL without reload
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }
+
   // ---------- Keyboard Shortcuts ----------
   document.addEventListener("keydown", (e) => {
     // Don't trigger shortcuts when typing in inputs
@@ -722,6 +983,39 @@ Amazon Web Services`,
 
   // ---------- Init ----------
   updateInboxCount();
+  updateCategoryCounts();
   renderMailList();
   showPanel("empty");
+  handleShareTarget();
+
+  // Also update AI chat to understand categories
+  const originalChat = aiEngine.chat.bind(aiEngine);
+  aiEngine.chat = async function (question, emails) {
+    const q = question.toLowerCase();
+    if (q.includes("triage") || q.includes("categor") || q.includes("sort")) {
+      const inbox = emails.filter((e) => e.folder === "inbox");
+      const triaged = inbox.filter((e) => e.category);
+      if (triaged.length === 0) {
+        return 'No emails have been triaged yet. Click "Triage Inbox" in the sidebar to let AI categorize your emails using the Email GPS system.';
+      }
+      const breakdown = Object.keys(CATEGORIES)
+        .map((c) => {
+          const n = triaged.filter((e) => e.category === c).length;
+          return n > 0 ? `${CATEGORIES[c].label}: ${n}` : null;
+        })
+        .filter(Boolean)
+        .join("\n- ");
+      return `Triage breakdown (${triaged.length}/${inbox.length} categorized):\n- ${breakdown}`;
+    }
+
+    if (q.includes("respond") || q.includes("urgent") || q.includes("action")) {
+      const respond = emails.filter(
+        (e) => e.folder === "inbox" && e.category === "respond"
+      );
+      if (respond.length === 0) return "No emails need your response right now.";
+      return `${respond.length} email(s) need your response:\n${respond.map((e) => `- "${e.subject}" from ${e.from.split("<")[0].trim()}`).join("\n")}`;
+    }
+
+    return originalChat(question, emails);
+  };
 })();

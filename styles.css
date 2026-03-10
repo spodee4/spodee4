@@ -180,6 +180,144 @@ html, body {
   border-radius: 10px;
 }
 
+/* ===== Triage Section (Dan Martel Email GPS) ===== */
+.triage-section {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.triage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.triage-header h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ai-accent);
+}
+
+.btn-ai-sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+#triage-categories {
+  list-style: none;
+}
+
+.triage-cat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-dim);
+  transition: background var(--transition);
+}
+
+.triage-cat:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.triage-cat.active {
+  background: var(--surface-hover);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cat-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 1px 6px;
+}
+
+/* Category tag in mail list */
+.mail-item-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.mail-item-category[data-cat="respond"] {
+  background: rgba(231, 76, 92, 0.15);
+  color: #e74c5c;
+}
+.mail-item-category[data-cat="review"] {
+  background: rgba(253, 203, 110, 0.15);
+  color: #fdcb6e;
+}
+.mail-item-category[data-cat="waiting"] {
+  background: rgba(0, 206, 201, 0.15);
+  color: #00cec9;
+}
+.mail-item-category[data-cat="receipts"] {
+  background: rgba(162, 155, 254, 0.15);
+  color: #a29bfe;
+}
+.mail-item-category[data-cat="newsletter"] {
+  background: rgba(99, 110, 114, 0.2);
+  color: #b2bec3;
+}
+.mail-item-category[data-cat="fyi"] {
+  background: rgba(85, 239, 196, 0.15);
+  color: #55efc4;
+}
+
+/* Category bar in detail view */
+#detail-category-bar {
+  margin-bottom: 8px;
+}
+
+#detail-category-bar:empty {
+  display: none;
+}
+
+.detail-cat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.triage-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--ai-accent-dim);
+  border: 1px solid rgba(0, 206, 201, 0.2);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--ai-accent);
+}
+
 /* AI Section */
 .ai-section {
   margin-top: auto;

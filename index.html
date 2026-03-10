@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spodee Mail — AI-Powered Email</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Spodee Mail">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -35,6 +40,43 @@
           </li>
         </ul>
       </nav>
+      <!-- AI Triage Categories (Dan Martel Email GPS) -->
+      <div class="triage-section">
+        <div class="triage-header">
+          <h3>AI Triage</h3>
+          <button id="triage-all-btn" class="btn-ai btn-ai-sm">&#10024; Triage Inbox</button>
+        </div>
+        <ul id="triage-categories">
+          <li class="triage-cat" data-category="all">
+            <span class="cat-dot" style="background:#6c5ce7"></span> All
+            <span class="badge cat-badge" id="cat-all-count"></span>
+          </li>
+          <li class="triage-cat" data-category="respond">
+            <span class="cat-dot" style="background:#e74c5c"></span> Respond
+            <span class="badge cat-badge" id="cat-respond-count"></span>
+          </li>
+          <li class="triage-cat" data-category="review">
+            <span class="cat-dot" style="background:#fdcb6e"></span> Review
+            <span class="badge cat-badge" id="cat-review-count"></span>
+          </li>
+          <li class="triage-cat" data-category="waiting">
+            <span class="cat-dot" style="background:#00cec9"></span> Waiting On
+            <span class="badge cat-badge" id="cat-waiting-count"></span>
+          </li>
+          <li class="triage-cat" data-category="receipts">
+            <span class="cat-dot" style="background:#a29bfe"></span> Receipts
+            <span class="badge cat-badge" id="cat-receipts-count"></span>
+          </li>
+          <li class="triage-cat" data-category="newsletter">
+            <span class="cat-dot" style="background:#636e72"></span> Newsletter
+            <span class="badge cat-badge" id="cat-newsletter-count"></span>
+          </li>
+          <li class="triage-cat" data-category="fyi">
+            <span class="cat-dot" style="background:#55efc4"></span> FYI
+            <span class="badge cat-badge" id="cat-fyi-count"></span>
+          </li>
+        </ul>
+      </div>
       <div class="ai-section">
         <h3>AI Assistant</h3>
         <div id="ai-chat">
@@ -79,6 +121,7 @@
         </div>
         <div id="detail-content">
           <h2 id="detail-subject"></h2>
+          <div id="detail-category-bar"></div>
           <div class="detail-meta">
             <span id="detail-from"></span>
             <span id="detail-date"></span>
@@ -126,5 +169,13 @@
   </div>
 
   <script src="app.js"></script>
+  <script>
+    // Register service worker for PWA + macOS Share Target
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then(function(reg) {
+        console.log("SW registered:", reg.scope);
+      });
+    }
+  </script>
 </body>
 </html>
