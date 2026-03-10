@@ -41,9 +41,9 @@
 
   <!-- Mobile top bar -->
   <header id="mobile-header" class="mobile-header">
-    <button id="menu-btn" class="icon-btn menu-btn" title="Menu">&#9776;</button>
+    <button id="menu-btn" class="icon-btn menu-btn" title="Menu"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <div class="logo">Mx <span class="ai-badge">AI</span></div>
-    <button id="mobile-compose-btn" class="icon-btn" title="Compose">&#9998;</button>
+    <button id="mobile-compose-btn" class="icon-btn" title="Compose"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
   </header>
 
   <!-- Sidebar overlay for mobile -->
@@ -63,29 +63,38 @@
       <button class="account-tab" data-account="gmail"><span class="acct-dot red"></span>Gmail</button>
     </div>
 
-    <button id="compose-btn" class="compose-button">&#9998; Compose</button>
+    <button id="compose-btn" class="compose-button"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Compose</button>
 
     <nav id="folders" class="folder-list">
-      <button class="folder active" data-folder="inbox">&#128229; Inbox <span class="badge" id="inbox-count">0</span></button>
-      <button class="folder" data-folder="snoozed">&#9200; Snoozed <span class="badge" id="snoozed-count">0</span></button>
-      <button class="folder" data-folder="starred">&#11088; Starred</button>
-      <button class="folder" data-folder="sent">&#128228; Sent</button>
-      <button class="folder" data-folder="drafts">&#128221; Drafts</button>
-      <button class="folder" data-folder="trash">&#128465; Trash</button>
+      <button class="folder active" data-folder="inbox"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg> Inbox <span class="badge" id="inbox-count">0</span></button>
+      <button class="folder" data-folder="snoozed"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Snoozed <span class="badge" id="snoozed-count">0</span></button>
+      <button class="folder" data-folder="starred"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Starred</button>
+      <button class="folder" data-folder="sent"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Sent</button>
+      <button class="folder" data-folder="drafts"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Drafts</button>
+      <button class="folder" data-folder="trash"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Trash</button>
     </nav>
 
     <nav class="view-switcher">
-      <button class="view-tab active" data-view="mail">&#128231; Mail</button>
-      <button class="view-tab" data-view="briefing">&#128203; Briefing</button>
-      <button class="view-tab" data-view="tasks">&#9989; Tasks</button>
-      <button class="view-tab" data-view="contacts">&#128100; Contacts</button>
-      <button class="view-tab" data-view="calendar">&#128197; Calendar</button>
-      <button class="view-tab" data-view="settings">&#9881; Settings</button>
+      <button class="view-tab active" data-view="mail"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg> Mail</button>
+      <button class="view-tab" data-view="briefing"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Briefing</button>
+      <button class="view-tab" data-view="tasks"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Tasks</button>
+      <button class="view-tab" data-view="contacts"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Contacts</button>
+      <button class="view-tab" data-view="calendar"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendar</button>
+      <button class="view-tab" data-view="settings"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Settings</button>
     </nav>
+
+    <div class="ai-assistant-chat">
+      <h3 class="section-title">Mx Chief of Staff</h3>
+      <div id="ai-messages"></div>
+      <div class="ai-input-row">
+        <input type="text" id="ai-input" placeholder="Ask Mx anything...">
+        <button id="ai-send-btn" class="icon-btn" title="Send"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
 
     <div id="triage-section" class="ai-triage-section">
       <h3 class="section-title">AI Triage</h3>
-      <button id="triage-all-btn" class="triage-action-btn">&#10024; Triage</button>
+      <button id="triage-all-btn" class="triage-action-btn" title="AI automatically categorizes your inbox emails into Respond, Review, Waiting, Receipts, Newsletter, and FYI"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Triage</button>
       <div id="triage-categories">
         <button class="triage-cat active" data-category="all"><span class="cat-dot all"></span>All <span class="badge" id="cat-all-count">0</span></button>
         <button class="triage-cat" data-category="respond"><span class="cat-dot respond"></span>Respond <span class="badge" id="cat-respond-count">0</span></button>
@@ -94,15 +103,6 @@
         <button class="triage-cat" data-category="receipts"><span class="cat-dot receipts"></span>Receipts <span class="badge" id="cat-receipts-count">0</span></button>
         <button class="triage-cat" data-category="newsletter"><span class="cat-dot newsletter"></span>Newsletter <span class="badge" id="cat-newsletter-count">0</span></button>
         <button class="triage-cat" data-category="fyi"><span class="cat-dot fyi"></span>FYI <span class="badge" id="cat-fyi-count">0</span></button>
-      </div>
-    </div>
-
-    <div class="ai-assistant-chat">
-      <h3 class="section-title">Mx Chief of Staff</h3>
-      <div id="ai-messages"></div>
-      <div class="ai-input-row">
-        <input type="text" id="ai-input" placeholder="Ask Mx anything...">
-        <button id="ai-send-btn" class="icon-btn" title="Send">&#10148;</button>
       </div>
     </div>
   </aside>
@@ -188,12 +188,12 @@
 
     <!-- AI Action Summary Bar -->
     <div id="ai-summary-bar" class="ai-action-bar hidden">
-      <button id="ai-summarize-btn" class="ai-action-btn" data-action="summarize">&#128221; Summarize</button>
-      <button id="ai-reply-suggest-btn" class="ai-action-btn" data-action="suggest-reply">&#128172; Suggest Reply</button>
-      <button id="ai-calendar-btn" class="ai-action-btn" data-action="calendar">&#128197; Calendar</button>
-      <button id="ai-extract-tasks-btn" class="ai-action-btn" data-action="extract-tasks">&#9989; Extract Tasks</button>
-      <button id="ai-schedule-btn" class="ai-action-btn" data-action="schedule">&#128336; Schedule</button>
-      <button id="ai-contact-btn" class="ai-action-btn" data-action="contact">&#128100; Contact</button>
+      <button id="ai-summarize-btn" class="ai-action-btn" data-action="summarize"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> Summarize</button>
+      <button id="ai-reply-suggest-btn" class="ai-action-btn" data-action="suggest-reply"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Suggest Reply</button>
+      <button id="ai-calendar-btn" class="ai-action-btn" data-action="calendar"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendar</button>
+      <button id="ai-extract-tasks-btn" class="ai-action-btn" data-action="extract-tasks"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Extract Tasks</button>
+      <button id="ai-schedule-btn" class="ai-action-btn" data-action="schedule"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Schedule</button>
+      <button id="ai-contact-btn" class="ai-action-btn" data-action="contact"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Contact</button>
     </div>
 
     <!-- Mail Detail -->
@@ -201,11 +201,11 @@
       <div class="detail-header">
         <button id="back-btn" class="icon-btn" title="Back">&#8592;</button>
         <div class="detail-actions">
-          <button id="star-btn" class="icon-btn" title="Star">&#9734;</button>
-          <button id="vip-btn" class="icon-btn" title="Mark VIP">&#9826;</button>
-          <button id="snooze-btn" class="icon-btn" title="Snooze">&#9200;</button>
-          <button id="reply-btn" class="icon-btn" title="Reply">&#8617;</button>
-          <button id="delete-btn" class="icon-btn" title="Delete">&#128465;</button>
+          <button id="star-btn" class="icon-btn" title="Star"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+          <button id="vip-btn" class="icon-btn" title="Mark VIP"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg></button>
+          <button id="snooze-btn" class="icon-btn" title="Snooze"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
+          <button id="reply-btn" class="icon-btn" title="Reply"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg></button>
+          <button id="delete-btn" class="icon-btn" title="Delete"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
         </div>
       </div>
 
@@ -276,9 +276,9 @@
         </div>
       </form>
       <div class="compose-toolbar">
-        <button type="button" id="ai-draft-btn" class="toolbar-btn" title="AI Draft">&#129302; AI Draft</button>
-        <button type="button" id="ai-improve-btn" class="toolbar-btn" title="AI Improve">&#10024; Improve</button>
-        <button type="button" id="template-btn" class="toolbar-btn" title="Templates">&#128196; Templates</button>
+        <button type="button" id="ai-draft-btn" class="toolbar-btn" title="AI Draft"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 015 5c0 2-1.5 3.5-3 4.5V14H10v-2.5C8.5 10.5 7 9 7 7a5 5 0 015-5z"/><line x1="10" y1="17" x2="14" y2="17"/><line x1="10" y1="20" x2="14" y2="20"/></svg> AI Draft</button>
+        <button type="button" id="ai-improve-btn" class="toolbar-btn" title="AI Improve"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Improve</button>
+        <button type="button" id="template-btn" class="toolbar-btn" title="Templates"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Templates</button>
         <div class="tone-selector">
           <button type="button" class="tone-btn active" data-tone="professional">Professional</button>
           <button type="button" class="tone-btn" data-tone="casual">Casual</button>
@@ -290,10 +290,10 @@
       <input type="file" id="compose-file" multiple hidden>
       <div id="compose-attachments" class="compose-attachments"></div>
       <div class="compose-actions">
-        <button type="button" id="send-btn" class="primary-btn">&#128228; Send</button>
-        <button type="button" id="attach-btn" class="icon-btn" title="Attach">&#128206;</button>
-        <button type="button" id="save-draft-btn" class="icon-btn" title="Save draft">&#128190;</button>
-        <button type="button" id="discard-btn" class="icon-btn" title="Discard">&#128465;</button>
+        <button type="submit" id="send-btn" class="primary-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send</button>
+        <button type="button" id="attach-btn" class="icon-btn" title="Attach"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
+        <button type="button" id="save-draft-btn" class="icon-btn" title="Save draft"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+        <button type="button" id="discard-btn" class="icon-btn" title="Discard"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
       </div>
     </div>
 
@@ -326,15 +326,15 @@
       </div>
       <div class="contact-section">
         <h3>Notes</h3>
-        <div id="contact-notes"></div>
+        <textarea id="contact-notes" placeholder="Add private notes about this contact..." rows="3"></textarea>
       </div>
       <div class="contact-section">
         <h3>Recent Emails</h3>
         <div id="contact-recent-emails"></div>
       </div>
       <div class="contact-actions">
-        <button id="analyze-contact-btn" class="ai-action-btn">&#10024; AI Analysis</button>
-        <button id="contact-vip-toggle" class="ai-action-btn">&#128081; Toggle VIP</button>
+        <button id="analyze-contact-btn" class="ai-action-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> AI Analysis</button>
+        <button id="contact-vip-toggle" class="ai-action-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 015 5v3H7V7a5 5 0 015-5z"/><path d="M5 12h14l1 9H4l1-9z"/></svg> Toggle VIP</button>
       </div>
     </div>
 
@@ -379,15 +379,15 @@
         </div>
         <div id="task-source" class="task-source"></div>
         <div class="task-actions">
-          <button type="button" id="save-task-btn" class="primary-btn">&#128190; Save</button>
-          <button type="button" id="complete-task-btn" class="icon-btn" title="Complete">&#9989; Complete</button>
+          <button type="button" id="save-task-btn" class="primary-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save</button>
+          <button type="button" id="complete-task-btn" class="icon-btn" title="Complete"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Complete</button>
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
     <div id="empty-state" class="empty-state">
-      <div class="empty-icon">&#128236;</div>
+      <div class="empty-icon"><svg class="icon-svg-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg></div>
       <h2>Select a message</h2>
       <p>Choose an email from the list to view its contents</p>
     </div>

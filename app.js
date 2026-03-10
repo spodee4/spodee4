@@ -260,6 +260,8 @@
     composeFile: $("#compose-file"),
     composeAttachments: $("#compose-attachments"),
     closeCompose: $("#close-compose"),
+    sendBtn: $("#send-btn"),
+    attachBtn: $("#attach-btn"),
     saveDraftBtn: $("#save-draft-btn"),
     discardBtn: $("#discard-btn"),
     aiDraftBtn: $("#ai-draft-btn"),
@@ -952,7 +954,8 @@
 
     // Toggle mail-list vs special views
     dom.mailList.classList.toggle("hidden", view !== "mail");
-    $(".mail-list-header").classList.toggle("hidden", view !== "mail");
+    const panelHeader = $(".panel-header");
+    if (panelHeader) panelHeader.classList.toggle("hidden", view !== "mail");
     dom.briefingView.classList.toggle("hidden", view !== "briefing");
     dom.tasksView.classList.toggle("hidden", view !== "tasks");
     dom.contactsView.classList.toggle("hidden", view !== "contacts");
@@ -1472,7 +1475,7 @@
       </div>
       <div class="vault-section">
         <div class="vault-header">
-          <span class="vault-icon">&#9881;</span>
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           <h3>App Info</h3>
         </div>
         <div class="settings-info">
@@ -1480,6 +1483,9 @@
           <div class="settings-row"><span class="settings-label">Credentials</span><span class="settings-value">${vaultCredentials.length}</span></div>
           <div class="settings-row"><span class="settings-label">Accounts</span><span class="settings-value">${state.accounts?.length || 0}</span></div>
         </div>
+      </div>
+      <div class="vault-section">
+        <button id="logout-btn" class="logout-btn"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sign Out</button>
       </div>
     `;
 
@@ -1489,6 +1495,10 @@
       vaultCredentials = [];
       renderSettings();
     });
+
+    // Logout button
+    const logoutBtn = $("#logout-btn");
+    if (logoutBtn) logoutBtn.addEventListener("click", logout);
 
     // Add credential form toggle
     const addForm = $("#vault-add-form");
@@ -1649,6 +1659,61 @@
 
   dom.discardBtn.addEventListener("click", () => showPanel("empty"));
   dom.undoSendBtn.addEventListener("click", undoSend);
+
+  // Send button click (also triggers form submit via type=submit, but ensure direct click works)
+  dom.sendBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendWithUndo();
+  });
+
+  // Attach button — opens file picker
+  dom.attachBtn.addEventListener("click", () => dom.composeFile.click());
+
+  // Right-click context menu on mail list
+  dom.mailList.addEventListener("contextmenu", (e) => {
+    const li = e.target.closest("li[data-id]");
+    if (!li) return;
+    e.preventDefault();
+    const emailId = parseInt(li.dataset.id);
+    const email = state.emails.find(em => em.id === emailId);
+    if (!email) return;
+
+    // Remove existing context menu
+    const old = document.getElementById("mail-context-menu");
+    if (old) old.remove();
+
+    const menu = document.createElement("div");
+    menu.id = "mail-context-menu";
+    menu.className = "context-menu";
+    menu.innerHTML = `
+      <button data-action="reply"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg> Reply</button>
+      <button data-action="star"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${email.starred ? "Unstar" : "Star"}</button>
+      <button data-action="read"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg> Mark ${email.read ? "Unread" : "Read"}</button>
+      <button data-action="snooze"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Snooze</button>
+      <button data-action="archive"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Archive</button>
+      <button data-action="trash"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete</button>
+    `;
+    menu.style.left = e.clientX + "px";
+    menu.style.top = e.clientY + "px";
+    document.body.appendChild(menu);
+
+    menu.addEventListener("click", (me) => {
+      const btn = me.target.closest("button");
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === "reply") { selectEmail(emailId); setTimeout(() => dom.replyBtn.click(), 100); }
+      else if (action === "star") toggleStar(emailId);
+      else if (action === "read") { email.read = email.read ? 0 : 1; api.patchEmail(emailId, "read", { read: email.read }); renderMailList(); }
+      else if (action === "snooze") { selectEmail(emailId); setTimeout(() => dom.snoozeBtn.click(), 100); }
+      else if (action === "archive") { email.folder = "archive"; api.moveEmail(emailId, "archive"); renderMailList(); }
+      else if (action === "trash") { email.folder = "trash"; api.moveEmail(emailId, "trash"); renderMailList(); }
+      menu.remove();
+    });
+
+    // Close on click outside
+    const closeMenu = () => { menu.remove(); document.removeEventListener("click", closeMenu); };
+    setTimeout(() => document.addEventListener("click", closeMenu), 10);
+  });
 
   // File attachments (preserved)
   dom.composeFile.addEventListener("change", (e) => {
@@ -2079,13 +2144,15 @@
     dom.analyzeContactBtn.innerHTML = "&#10024; AI Analysis";
   });
 
-  if (dom.contactVipToggle) dom.contactVipToggle.addEventListener("click", () => {
+  if (dom.contactVipToggle) dom.contactVipToggle.addEventListener("click", async () => {
     if (!state.selectedContactEmail) return;
     const contact = state.contacts.find(c => c.email === state.selectedContactEmail);
     if (contact) {
       contact.is_vip = contact.is_vip ? 0 : 1;
       if (contact.is_vip) state.vipContacts.add(contact.email);
       else state.vipContacts.delete(contact.email);
+      // Persist to server
+      try { await api.fetch(`/contacts/${encodeURIComponent(contact.email)}`, { method: "PATCH", body: { is_vip: contact.is_vip } }); } catch (e) { /* local-only fallback */ }
     }
     selectContact(state.selectedContactEmail);
   });
