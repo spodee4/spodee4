@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient: deep indigo to dark blue -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1145"/>
+      <stop offset="50%" stop-color="#140e30"/>
+      <stop offset="100%" stop-color="#0d0a1f"/>
+    </linearGradient>
+
+    <!-- Envelope gradient -->
+    <linearGradient id="envGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e4f0"/>
+      <stop offset="100%" stop-color="#c5bdd6"/>
+    </linearGradient>
+
+    <!-- Flap gradient -->
+    <linearGradient id="flapGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d6d0e4"/>
+      <stop offset="100%" stop-color="#b8aed0"/>
+    </linearGradient>
+
+    <!-- AI accent gradient: vibrant purple to electric blue -->
+    <linearGradient id="aiGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Sparkle gradient -->
+    <linearGradient id="sparkle" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+
+    <!-- Shadow filter -->
+    <filter id="envShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="aiGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+
+    <!-- Subtle inner light on envelope -->
+    <filter id="innerLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="-2" stdDeviation="4" flood-color="#fff" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background: rounded square -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+
+  <!-- Subtle ambient glow behind envelope -->
+  <ellipse cx="512" cy="530" rx="320" ry="260" fill="url(#glow)"/>
+
+  <!-- === ENVELOPE === -->
+  <g filter="url(#envShadow)">
+    <!-- Envelope body -->
+    <rect x="212" y="340" width="600" height="380" rx="24" fill="url(#envGrad)"/>
+
+    <!-- Envelope inner shadow line -->
+    <rect x="212" y="680" width="600" height="40" rx="0" fill="#b8aed0" opacity="0.3"/>
+
+    <!-- Envelope flap (open, tilted back) -->
+    <path d="M212,364 L512,200 L812,364" fill="url(#flapGrad)" stroke="#a89cc0" stroke-width="2"/>
+
+    <!-- Envelope V-fold lines -->
+    <path d="M212,340 L512,540 L812,340" fill="none" stroke="#a89cc0" stroke-width="2.5" opacity="0.6"/>
+  </g>
+
+  <!-- === AI BADGE (top-right of envelope) === -->
+  <g>
+    <!-- Badge glow -->
+    <rect x="636" y="278" width="168" height="72" rx="36" fill="#7c3aed" opacity="0.4" filter="url(#aiGlow)"/>
+    <!-- Badge body -->
+    <rect x="642" y="284" width="156" height="60" rx="30" fill="url(#aiGrad)"/>
+    <!-- Badge text -->
+    <text x="720" y="324" text-anchor="middle" font-family="SF Pro Display, -apple-system, system-ui, Helvetica Neue, sans-serif" font-weight="800" font-size="34" fill="#fff" letter-spacing="3">AI</text>
+  </g>
+
+  <!-- === "Mx" LOGOTYPE on envelope body === -->
+  <text x="512" y="590" text-anchor="middle" font-family="SF Pro Display, -apple-system, system-ui, Helvetica Neue, sans-serif" font-weight="800" font-size="180" fill="#2d1f5e" opacity="0.12">Mx</text>
+
+  <!-- === SPARKLE DECORATIONS (AI feel) === -->
+  <!-- Top-left sparkle -->
+  <g transform="translate(280, 260)" fill="url(#sparkle)" opacity="0.7">
+    <path d="M0,-16 L4,0 L0,16 L-4,0 Z"/>
+    <path d="M-16,0 L0,-4 L16,0 L0,4 Z"/>
+  </g>
+
+  <!-- Right sparkle -->
+  <g transform="translate(820, 460)" fill="url(#sparkle)" opacity="0.5">
+    <path d="M0,-12 L3,0 L0,12 L-3,0 Z"/>
+    <path d="M-12,0 L0,-3 L12,0 L0,3 Z"/>
+  </g>
+
+  <!-- Small sparkle top -->
+  <g transform="translate(600, 220)" fill="#c084fc" opacity="0.4">
+    <path d="M0,-8 L2,0 L0,8 L-2,0 Z"/>
+    <path d="M-8,0 L0,-2 L8,0 L0,2 Z"/>
+  </g>
+
+  <!-- Bottom-left sparkle -->
+  <g transform="translate(240, 620)" fill="url(#sparkle)" opacity="0.35">
+    <path d="M0,-10 L2.5,0 L0,10 L-2.5,0 Z"/>
+    <path d="M-10,0 L0,-2.5 L10,0 L0,2.5 Z"/>
+  </g>
+
+  <!-- === SUBTLE GRID PATTERN (tech feel) === -->
+  <g stroke="#7c3aed" stroke-width="0.5" opacity="0.06">
+    <line x1="160" y1="160" x2="160" y2="864"/>
+    <line x1="288" y1="160" x2="288" y2="864"/>
+    <line x1="416" y1="160" x2="416" y2="864"/>
+    <line x1="544" y1="160" x2="544" y2="864"/>
+    <line x1="672" y1="160" x2="672" y2="864"/>
+    <line x1="800" y1="160" x2="800" y2="864"/>
+    <line x1="160" y1="288" x2="864" y2="288"/>
+    <line x1="160" y1="416" x2="864" y2="416"/>
+    <line x1="160" y1="544" x2="864" y2="544"/>
+    <line x1="160" y1="672" x2="864" y2="672"/>
+    <line x1="160" y1="800" x2="864" y2="800"/>
+  </g>
+
+  <!-- === BOTTOM LABEL === -->
+  <text x="512" y="810" text-anchor="middle" font-family="SF Pro Display, -apple-system, system-ui, Helvetica Neue, sans-serif" font-weight="700" font-size="56" fill="#c084fc" opacity="0.65" letter-spacing="8">Mx MAIL</text>
+</svg>

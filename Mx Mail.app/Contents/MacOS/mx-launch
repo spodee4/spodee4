@@ -1,0 +1,63 @@
+#!/bin/bash
+# Mx Mail Launcher — starts the Mx AI email server and opens in browser
+
+MX_DIR="/tmp/mx-app"
+MX_PORT=3000
+MX_URL="http://localhost:$MX_PORT"
+LOG_FILE="/tmp/mx-mail.log"
+PID_FILE="/tmp/mx-mail.pid"
+
+# Check if Node.js is available
+NODE=$(which node 2>/dev/null || echo "/opt/homebrew/bin/node" )
+if [ ! -x "$NODE" ]; then
+    NODE="/usr/local/bin/node"
+fi
+if [ ! -x "$NODE" ]; then
+    osascript -e 'display dialog "Node.js not found. Please install Node.js to run Mx Mail." buttons {"OK"} default button "OK" with title "Mx Mail" with icon stop'
+    exit 1
+fi
+
+# Check if Mx app directory exists
+if [ ! -d "$MX_DIR" ]; then
+    osascript -e 'display dialog "Mx app not found at '"$MX_DIR"'. Please clone the repository first." buttons {"OK"} default button "OK" with title "Mx Mail" with icon stop'
+    exit 1
+fi
+
+# Check if server is already running
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    # Server already running, just open browser
+    open "$MX_URL"
+    exit 0
+fi
+
+# Also check if port is in use
+if lsof -i :"$MX_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    open "$MX_URL"
+    exit 0
+fi
+
+# Start the server
+cd "$MX_DIR" || exit 1
+$NODE server/index.js > "$LOG_FILE" 2>&1 &
+SERVER_PID=$!
+echo "$SERVER_PID" > "$PID_FILE"
+
+# Wait for server to be ready (max 10 seconds)
+for i in $(seq 1 20); do
+    if curl -s --connect-timeout 1 "$MX_URL" >/dev/null 2>&1; then
+        break
+    fi
+    sleep 0.5
+done
+
+# Open browser
+open "$MX_URL"
+
+# Show notification
+osascript -e "display notification \"Mx Mail server started on port $MX_PORT\" with title \"Mx Mail\" subtitle \"PID: $SERVER_PID\""
+
+# Keep running (foreground so Dock shows the icon)
+wait "$SERVER_PID"
+
+# Cleanup on exit
+rm -f "$PID_FILE"
