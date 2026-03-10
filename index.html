@@ -2,235 +2,383 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mx — AI Email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mx — AI Chief of Staff</title>
+  <meta name="description" content="Mx — AI Chief of Staff for your email">
+  <meta name="theme-color" content="#0a0a0f">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Mx">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mx">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <!-- Sidebar -->
-    <aside id="sidebar">
-      <div class="sidebar-header">
-        <h1 class="logo">Mx</h1>
-        <span class="logo-badge">AI</span>
-        <div class="theme-toggle" id="theme-toggle" title="Toggle theme">&#9790;</div>
+
+<div id="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">Mx <span class="ai-badge">AI</span></div>
+      <button id="theme-toggle" class="icon-btn" title="Toggle theme">&#9790;</button>
+    </div>
+
+    <div class="account-switcher">
+      <button class="account-tab active" data-account="all">All</button>
+      <button class="account-tab" data-account="zoho-biz"><span class="acct-dot purple"></span>Zoho</button>
+      <button class="account-tab" data-account="zoho-web"><span class="acct-dot blue"></span>Web</button>
+      <button class="account-tab" data-account="gmail"><span class="acct-dot red"></span>Gmail</button>
+    </div>
+
+    <button id="compose-btn" class="compose-button">&#9998; Compose</button>
+
+    <nav id="folders" class="folder-list">
+      <button class="folder active" data-folder="inbox">&#128229; Inbox <span class="badge" id="inbox-count">0</span></button>
+      <button class="folder" data-folder="snoozed">&#9200; Snoozed <span class="badge" id="snoozed-count">0</span></button>
+      <button class="folder" data-folder="starred">&#11088; Starred</button>
+      <button class="folder" data-folder="sent">&#128228; Sent</button>
+      <button class="folder" data-folder="drafts">&#128221; Drafts</button>
+      <button class="folder" data-folder="trash">&#128465; Trash</button>
+    </nav>
+
+    <nav class="view-switcher">
+      <button class="view-tab active" data-view="mail">&#128231; Mail</button>
+      <button class="view-tab" data-view="briefing">&#128203; Briefing</button>
+      <button class="view-tab" data-view="tasks">&#9989; Tasks</button>
+      <button class="view-tab" data-view="contacts">&#128100; Contacts</button>
+      <button class="view-tab" data-view="calendar">&#128197; Calendar</button>
+    </nav>
+
+    <div id="triage-section" class="ai-triage-section">
+      <h3 class="section-title">AI Triage</h3>
+      <button id="triage-all-btn" class="triage-action-btn">&#10024; Triage</button>
+      <div id="triage-categories">
+        <button class="triage-cat active" data-category="all"><span class="cat-dot all"></span>All <span class="badge" id="cat-all-count">0</span></button>
+        <button class="triage-cat" data-category="respond"><span class="cat-dot respond"></span>Respond <span class="badge" id="cat-respond-count">0</span></button>
+        <button class="triage-cat" data-category="review"><span class="cat-dot review"></span>Review <span class="badge" id="cat-review-count">0</span></button>
+        <button class="triage-cat" data-category="waiting"><span class="cat-dot waiting"></span>Waiting <span class="badge" id="cat-waiting-count">0</span></button>
+        <button class="triage-cat" data-category="receipts"><span class="cat-dot receipts"></span>Receipts <span class="badge" id="cat-receipts-count">0</span></button>
+        <button class="triage-cat" data-category="newsletter"><span class="cat-dot newsletter"></span>Newsletter <span class="badge" id="cat-newsletter-count">0</span></button>
+        <button class="triage-cat" data-category="fyi"><span class="cat-dot fyi"></span>FYI <span class="badge" id="cat-fyi-count">0</span></button>
       </div>
+    </div>
 
-      <!-- Account Switcher -->
-      <div class="account-switcher">
-        <button class="account-tab active" data-account="all">
-          All
-        </button>
-        <button class="account-tab" data-account="zoho-biz">
-          <span class="account-dot" style="background:oklch(0.7162 0.1597 290.3962)"></span>Zoho
-        </button>
-        <button class="account-tab" data-account="zoho-web">
-          <span class="account-dot" style="background:oklch(0.7482 0.1235 244.7492)"></span>Web
-        </button>
-        <button class="account-tab" data-account="gmail">
-          <span class="account-dot" style="background:oklch(0.6861 0.2061 14.9941)"></span>Gmail
-        </button>
+    <div class="ai-assistant-chat">
+      <h3 class="section-title">Mx Chief of Staff</h3>
+      <div id="ai-messages"></div>
+      <div class="ai-input-row">
+        <input type="text" id="ai-input" placeholder="Ask Mx anything...">
+        <button id="ai-send-btn" class="icon-btn" title="Send">&#10148;</button>
       </div>
+    </div>
+  </aside>
 
-      <button id="compose-btn" class="btn-primary">+ Compose</button>
-
-      <nav id="folders">
-        <ul>
-          <li class="folder active" data-folder="inbox">
-            <span class="folder-icon">&#128229;</span> Inbox
-            <span class="badge" id="inbox-count">3</span>
-          </li>
-          <li class="folder" data-folder="snoozed">
-            <span class="folder-icon">&#9200;</span> Snoozed
-            <span class="badge hidden" id="snoozed-count">0</span>
-          </li>
-          <li class="folder" data-folder="starred">
-            <span class="folder-icon">&#9733;</span> Starred
-          </li>
-          <li class="folder" data-folder="sent">
-            <span class="folder-icon">&#9993;</span> Sent
-          </li>
-          <li class="folder" data-folder="drafts">
-            <span class="folder-icon">&#128221;</span> Drafts
-          </li>
-          <li class="folder" data-folder="trash">
-            <span class="folder-icon">&#128465;</span> Trash
-          </li>
-        </ul>
-      </nav>
-
-      <!-- AI Triage Categories (Dan Martel Email GPS) -->
-      <div class="triage-section">
-        <div class="triage-header">
-          <h3>AI Triage</h3>
-          <button id="triage-all-btn" class="btn-ai btn-ai-sm">&#10024; Triage</button>
-        </div>
-        <ul id="triage-categories">
-          <li class="triage-cat" data-category="all">
-            <span class="cat-dot" style="background:var(--primary)"></span> All
-            <span class="badge cat-badge" id="cat-all-count"></span>
-          </li>
-          <li class="triage-cat" data-category="respond">
-            <span class="cat-dot" style="background:var(--star)"></span> Respond
-            <span class="badge cat-badge" id="cat-respond-count"></span>
-          </li>
-          <li class="triage-cat" data-category="review">
-            <span class="cat-dot" style="background:var(--chart-1)"></span> Review
-            <span class="badge cat-badge" id="cat-review-count"></span>
-          </li>
-          <li class="triage-cat" data-category="waiting">
-            <span class="cat-dot" style="background:var(--chart-3)"></span> Waiting On
-            <span class="badge cat-badge" id="cat-waiting-count"></span>
-          </li>
-          <li class="triage-cat" data-category="receipts">
-            <span class="cat-dot" style="background:var(--chart-2)"></span> Receipts
-            <span class="badge cat-badge" id="cat-receipts-count"></span>
-          </li>
-          <li class="triage-cat" data-category="newsletter">
-            <span class="cat-dot" style="background:var(--text-dim)"></span> Newsletter
-            <span class="badge cat-badge" id="cat-newsletter-count"></span>
-          </li>
-          <li class="triage-cat" data-category="fyi">
-            <span class="cat-dot" style="background:var(--chart-4)"></span> FYI
-            <span class="badge cat-badge" id="cat-fyi-count"></span>
-          </li>
-        </ul>
+  <!-- ===== MAIL LIST PANEL ===== -->
+  <section id="mail-list-panel">
+    <div class="panel-header">
+      <div class="search-bar">
+        <input type="search" id="search-input" placeholder="Search mail...">
       </div>
+      <button id="refresh-btn" class="icon-btn" title="Refresh">&#128260;</button>
+      <select id="filter-select">
+        <option value="all">All</option>
+        <option value="unread">Unread</option>
+        <option value="read">Read</option>
+        <option value="vip">VIP</option>
+      </select>
+    </div>
 
-      <!-- AI Assistant Chat -->
-      <div class="ai-section">
-        <h3>Mx Assistant</h3>
-        <div id="ai-chat">
-          <div id="ai-messages"></div>
-          <div class="ai-input-row">
-            <input type="text" id="ai-input" placeholder="Tell Mx what to do...">
-            <button id="ai-send-btn">&#9654;</button>
-          </div>
-        </div>
+    <ul id="mail-list"></ul>
+
+    <!-- Briefing View -->
+    <div id="briefing-view" class="alt-view hidden">
+      <div class="alt-view-header">
+        <h2 id="briefing-greeting">Good morning</h2>
+        <button id="refresh-briefing-btn" class="icon-btn" title="Refresh briefing">&#128260;</button>
       </div>
-    </aside>
+      <div id="briefing-content"></div>
+    </div>
 
-    <!-- Mail List -->
-    <main id="mail-list-panel">
-      <div class="mail-list-header">
-        <div class="search-bar">
-          <input type="text" id="search-input" placeholder="Search all mail...">
-        </div>
-        <div class="mail-list-actions">
-          <button class="action-btn" id="refresh-btn" title="Refresh">&#8635;</button>
-          <select id="filter-select">
-            <option value="all">All Mail</option>
-            <option value="unread">Unread</option>
-            <option value="read">Read</option>
-            <option value="vip">VIP Only</option>
-          </select>
-        </div>
+    <!-- Tasks View -->
+    <div id="tasks-view" class="alt-view hidden">
+      <div class="alt-view-header">
+        <h2>Tasks</h2>
+        <button id="add-task-btn" class="icon-btn" title="Add task">&#10133;</button>
+        <select id="task-filter">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="high">High Priority</option>
+        </select>
       </div>
-      <ul id="mail-list"></ul>
-    </main>
+      <div id="tasks-list"></div>
+    </div>
 
-    <!-- Mail Detail / Compose -->
-    <section id="detail-panel">
-      <!-- Read view -->
-      <div id="mail-detail" class="hidden">
-        <div class="detail-header">
-          <button id="back-btn" class="action-btn">&#8592; Back</button>
-          <div class="detail-actions">
-            <button class="action-btn" id="star-btn" title="Star">&#9734;</button>
-            <button class="action-btn" id="vip-btn" title="VIP">&#9826; VIP</button>
-            <button class="action-btn" id="snooze-btn" title="Snooze" style="position:relative">&#9200; Snooze</button>
-            <button class="action-btn" id="reply-btn" title="Reply">&#8617; Reply</button>
-            <button class="action-btn" id="delete-btn" title="Delete">&#128465;</button>
-          </div>
-        </div>
-        <div id="detail-content">
-          <h2 id="detail-subject"></h2>
-          <div id="detail-category-bar"></div>
-          <div id="detail-score-bar"></div>
-          <div class="detail-meta">
-            <span id="detail-from"></span>
-            <span id="detail-date"></span>
-          </div>
-          <div id="detail-body"></div>
-          <div id="detail-attachments"></div>
-        </div>
-        <div id="ai-summary-bar" class="hidden">
-          <button id="ai-summarize-btn" class="btn-ai">&#10024; Summarize</button>
-          <button id="ai-reply-suggest-btn" class="btn-ai">&#10024; Suggest Reply</button>
-          <button id="ai-calendar-btn" class="btn-ai">&#128197; Add to Calendar</button>
-          <div id="ai-result" class="hidden"></div>
+    <!-- Contacts View -->
+    <div id="contacts-view" class="alt-view hidden">
+      <div class="alt-view-header">
+        <h2>Contacts</h2>
+        <select id="contact-sort">
+          <option value="name">Sort by Name</option>
+          <option value="recent">Sort by Recent</option>
+          <option value="score">Sort by Score</option>
+        </select>
+      </div>
+      <div id="contacts-list"></div>
+    </div>
+
+    <!-- Calendar View -->
+    <div id="calendar-view" class="alt-view hidden">
+      <div class="alt-view-header">
+        <h2>Calendar</h2>
+        <div class="calendar-nav">
+          <button id="cal-prev" class="icon-btn" title="Previous">&#9664;</button>
+          <span id="cal-date-label"></span>
+          <button id="cal-next" class="icon-btn" title="Next">&#9654;</button>
         </div>
       </div>
+      <div id="calendar-events"></div>
+    </div>
+  </section>
 
-      <!-- Compose view -->
-      <div id="compose-panel" class="hidden">
-        <div class="compose-header">
-          <h2>New Message</h2>
-          <button id="close-compose" class="action-btn">&times;</button>
+  <!-- ===== DETAIL PANEL ===== -->
+  <section id="detail-panel">
+
+    <!-- AI Action Summary Bar -->
+    <div id="ai-summary-bar" class="ai-action-bar hidden">
+      <button id="ai-summarize-btn" class="ai-action-btn" data-action="summarize">&#128221; Summarize</button>
+      <button id="ai-reply-suggest-btn" class="ai-action-btn" data-action="suggest-reply">&#128172; Suggest Reply</button>
+      <button id="ai-calendar-btn" class="ai-action-btn" data-action="calendar">&#128197; Calendar</button>
+      <button id="ai-extract-tasks-btn" class="ai-action-btn" data-action="extract-tasks">&#9989; Extract Tasks</button>
+      <button id="ai-schedule-btn" class="ai-action-btn" data-action="schedule">&#128336; Schedule</button>
+      <button id="ai-contact-btn" class="ai-action-btn" data-action="contact">&#128100; Contact</button>
+    </div>
+
+    <!-- Mail Detail -->
+    <div id="mail-detail" class="hidden">
+      <div class="detail-header">
+        <button id="back-btn" class="icon-btn" title="Back">&#8592;</button>
+        <div class="detail-actions">
+          <button id="star-btn" class="icon-btn" title="Star">&#9734;</button>
+          <button id="vip-btn" class="icon-btn" title="Mark VIP">&#9826;</button>
+          <button id="snooze-btn" class="icon-btn" title="Snooze">&#9200;</button>
+          <button id="reply-btn" class="icon-btn" title="Reply">&#8617;</button>
+          <button id="delete-btn" class="icon-btn" title="Delete">&#128465;</button>
         </div>
-        <form id="compose-form">
+      </div>
+
+      <!-- Thread Summary Card -->
+      <div id="thread-summary-card" class="thread-summary hidden">
+        <div class="thread-summary-header">
+          <span id="thread-health" class="health-badge"></span>
+          <span id="thread-topic" class="thread-topic"></span>
+          <button id="analyze-thread-btn" class="icon-btn" title="Analyze thread">&#10024; Analyze</button>
+        </div>
+        <div class="thread-summary-meta">
+          <span id="thread-started"></span>
+          <span id="thread-participants"></span>
+        </div>
+        <div id="thread-decisions" class="thread-summary-section hidden">
+          <h4>Key Decisions</h4>
+          <ul id="thread-decisions-list"></ul>
+        </div>
+        <div id="thread-open-items" class="thread-summary-section hidden">
+          <h4>Open Items</h4>
+          <ul id="thread-open-items-list"></ul>
+        </div>
+        <div id="thread-suggested-action" class="thread-summary-section hidden">
+        </div>
+      </div>
+
+      <!-- Thread Timeline -->
+      <div id="thread-timeline" class="hidden">
+        <div id="timeline-messages"></div>
+      </div>
+
+      <div id="detail-content" class="detail-content">
+        <h1 id="detail-subject"></h1>
+        <div id="detail-category-bar" class="category-bar"></div>
+        <div id="detail-score-bar" class="score-bar"></div>
+        <div class="detail-meta">
+          <span id="detail-from"></span>
+          <span id="detail-date"></span>
+        </div>
+        <div id="detail-body" class="detail-body"></div>
+      </div>
+
+      <div id="ai-result" class="ai-result hidden"></div>
+    </div>
+
+    <!-- Compose Panel -->
+    <div id="compose-panel" class="hidden">
+      <div class="compose-header">
+        <h2>New Message</h2>
+        <button id="close-compose" class="icon-btn" title="Close">&#10005;</button>
+      </div>
+      <form id="compose-form" class="compose-fields">
+        <div class="compose-field">
+          <label for="compose-from">From:</label>
           <select id="compose-from">
-            <option value="zoho-biz">From: Zoho Business</option>
-            <option value="zoho-web">From: Zoho Website</option>
-            <option value="gmail">From: Gmail Personal</option>
+            <option value="zoho-biz">john@akinsfreshmarkets.com</option>
+            <option value="zoho-web">info@akinsfreshmarkets.com</option>
+            <option value="gmail">john@gmail.com</option>
           </select>
-          <input type="email" id="compose-to" placeholder="To" required>
+        </div>
+        <div class="compose-field">
+          <label for="compose-to">To:</label>
+          <input type="text" id="compose-to" placeholder="recipient@example.com">
+        </div>
+        <div class="compose-field">
+          <label for="compose-subject">Subject:</label>
           <input type="text" id="compose-subject" placeholder="Subject">
-          <div class="compose-toolbar" style="position:relative">
-            <button type="button" class="btn-ai" id="ai-draft-btn">&#10024; AI Draft</button>
-            <button type="button" class="btn-ai" id="ai-improve-btn">&#10024; Improve</button>
-            <button type="button" class="btn-ai" id="template-btn">&#128203; Templates</button>
-            <div class="tone-selector">
-              <button type="button" class="tone-btn" data-tone="professional">Pro</button>
-              <button type="button" class="tone-btn" data-tone="friendly">Friendly</button>
-              <button type="button" class="tone-btn" data-tone="formal">Formal</button>
-              <button type="button" class="tone-btn" data-tone="brief">Brief</button>
-            </div>
-          </div>
-          <textarea id="compose-body" rows="12" placeholder="Write your message..."></textarea>
-          <div class="compose-attachments" id="compose-attachments"></div>
-          <div class="compose-actions">
-            <button type="submit" class="btn-primary">Send</button>
-            <label class="compose-file-btn">
-              &#128206; Attach
-              <input type="file" id="compose-file" multiple hidden>
-            </label>
-            <button type="button" id="save-draft-btn" class="btn-secondary">Save Draft</button>
-            <button type="button" id="discard-btn" class="btn-secondary">Discard</button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Empty state -->
-      <div id="empty-state">
-        <div class="empty-state-content">
-          <span class="empty-icon">&#9993;</span>
-          <h2>Select a message to read</h2>
-          <p>Or tell Mx what you need</p>
+        </div>
+      </form>
+      <div class="compose-toolbar">
+        <button type="button" id="ai-draft-btn" class="toolbar-btn" title="AI Draft">&#129302; AI Draft</button>
+        <button type="button" id="ai-improve-btn" class="toolbar-btn" title="AI Improve">&#10024; Improve</button>
+        <button type="button" id="template-btn" class="toolbar-btn" title="Templates">&#128196; Templates</button>
+        <div class="tone-selector">
+          <button type="button" class="tone-btn active" data-tone="professional">Professional</button>
+          <button type="button" class="tone-btn" data-tone="casual">Casual</button>
+          <button type="button" class="tone-btn" data-tone="friendly">Friendly</button>
+          <button type="button" class="tone-btn" data-tone="formal">Formal</button>
         </div>
       </div>
-    </section>
-  </div>
+      <textarea id="compose-body" placeholder="Write your message..."></textarea>
+      <input type="file" id="compose-file" multiple hidden>
+      <div id="compose-attachments" class="compose-attachments"></div>
+      <div class="compose-actions">
+        <button type="button" id="send-btn" class="primary-btn">&#128228; Send</button>
+        <button type="button" id="attach-btn" class="icon-btn" title="Attach">&#128206;</button>
+        <button type="button" id="save-draft-btn" class="icon-btn" title="Save draft">&#128190;</button>
+        <button type="button" id="discard-btn" class="icon-btn" title="Discard">&#128465;</button>
+      </div>
+    </div>
 
-  <!-- Undo send toast (hidden by default) -->
-  <div id="undo-toast" class="undo-toast hidden">
-    <span>Message sent.</span>
-    <div class="undo-progress"><div class="undo-progress-bar" id="undo-progress-bar"></div></div>
-    <button class="undo-btn" id="undo-send-btn">Undo</button>
-  </div>
+    <!-- Contact Detail -->
+    <div id="contact-detail" class="hidden">
+      <div class="detail-header">
+        <button id="contact-back-btn" class="icon-btn" title="Back">&#8592;</button>
+        <h2>Contact</h2>
+      </div>
+      <div class="contact-card">
+        <div id="contact-avatar" class="contact-avatar"></div>
+        <div class="contact-info">
+          <h3 id="contact-name"></h3>
+          <p id="contact-email-display" class="contact-email"></p>
+          <p id="contact-role" class="contact-role"></p>
+          <p id="contact-company" class="contact-company"></p>
+        </div>
+        <div class="score-ring">
+          <span id="contact-score">0</span>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat"><span class="stat-value" id="contact-email-count">0</span><span class="stat-label">Emails</span></div>
+        <div class="stat"><span class="stat-value" id="contact-last-contact">--</span><span class="stat-label">Last Contact</span></div>
+        <div class="stat"><span class="stat-value" id="contact-first-contact">--</span><span class="stat-label">First Contact</span></div>
+      </div>
+      <div class="contact-section">
+        <h3>Common Topics</h3>
+        <div id="contact-topics"></div>
+      </div>
+      <div class="contact-section">
+        <h3>Notes</h3>
+        <div id="contact-notes"></div>
+      </div>
+      <div class="contact-section">
+        <h3>Recent Emails</h3>
+        <div id="contact-recent-emails"></div>
+      </div>
+      <div class="contact-actions">
+        <button id="analyze-contact-btn" class="ai-action-btn">&#10024; AI Analysis</button>
+        <button id="contact-vip-toggle" class="ai-action-btn">&#128081; Toggle VIP</button>
+      </div>
+    </div>
 
-  <script src="app.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").then(function(reg) {
-        console.log("SW registered:", reg.scope);
-      });
-    }
-  </script>
+    <!-- Task Detail -->
+    <div id="task-detail" class="hidden">
+      <div class="detail-header">
+        <button id="task-back-btn" class="icon-btn" title="Back">&#8592;</button>
+        <h2>Task</h2>
+      </div>
+      <div class="task-form">
+        <div class="form-field">
+          <label for="task-title-input">Title</label>
+          <input type="text" id="task-title-input">
+        </div>
+        <div class="form-field">
+          <label for="task-desc-input">Description</label>
+          <textarea id="task-desc-input"></textarea>
+        </div>
+        <div class="form-field">
+          <label for="task-priority-input">Priority</label>
+          <select id="task-priority-input">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="task-due-input">Due Date</label>
+          <input type="date" id="task-due-input">
+        </div>
+        <div class="form-field">
+          <label for="task-assigned-input">Assigned To</label>
+          <input type="text" id="task-assigned-input">
+        </div>
+        <div class="form-field">
+          <label for="task-status-input">Status</label>
+          <select id="task-status-input">
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div id="task-source" class="task-source"></div>
+        <div class="task-actions">
+          <button type="button" id="save-task-btn" class="primary-btn">&#128190; Save</button>
+          <button type="button" id="complete-task-btn" class="icon-btn" title="Complete">&#9989; Complete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">&#128236;</div>
+      <h2>Select a message</h2>
+      <p>Choose an email from the list to view its contents</p>
+    </div>
+
+  </section>
+</div>
+
+<!-- Undo Toast -->
+<div id="undo-toast" class="toast hidden">
+  <span id="undo-toast-message">Email sent</span>
+  <div id="undo-progress-bar" class="undo-progress"></div>
+  <button id="undo-send-btn">Undo</button>
+</div>
+
+<!-- Notification Toast -->
+<div id="notification-toast" class="toast notification-toast hidden">
+  <span id="notification-title"></span>
+  <span id="notification-message"></span>
+  <button id="notification-close" class="icon-btn">&#10005;</button>
+</div>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('Service Worker registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('Service Worker registration failed:', err);
+    });
+  }
+</script>
 </body>
 </html>
