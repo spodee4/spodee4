@@ -15,7 +15,7 @@ const auth = require("./auth");
 const vault = require("./vault");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3100;
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(cookieParser());

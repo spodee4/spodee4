@@ -2,7 +2,7 @@
 # Mx Mail Launcher — starts the Mx AI email server and opens in browser
 
 MX_DIR="/tmp/mx-app"
-MX_PORT=3000
+MX_PORT=3100
 MX_URL="http://localhost:$MX_PORT"
 LOG_FILE="/tmp/mx-mail.log"
 PID_FILE="/tmp/mx-mail.pid"
