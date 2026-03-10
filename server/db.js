@@ -260,6 +260,35 @@ function init() {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      display_name TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
+
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      endpoint TEXT UNIQUE NOT NULL,
+      keys_p256dh TEXT,
+      keys_auth TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
   `);
 
   return db;
@@ -874,4 +903,57 @@ module.exports = {
   deleteBriefing,
   insertMemory,
   linkProjectEmail,
+  // Auth
+  createUser,
+  getUserByUsername,
+  createSession,
+  getSession,
+  deleteSession,
+  cleanExpiredSessions,
+  // Push subscriptions
+  savePushSubscription,
+  getPushSubscriptions,
+  deletePushSubscription,
 };
+
+// ─── Auth Functions ───────────────────────────────────────────────
+
+function createUser(username, passwordHash, displayName) {
+  const stmt = db.prepare("INSERT INTO users (username, password_hash, display_name) VALUES (?, ?, ?)");
+  return stmt.run(username, passwordHash, displayName || username);
+}
+
+function getUserByUsername(username) {
+  return db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+}
+
+function createSession(token, userId, expiresAt) {
+  db.prepare("INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)").run(token, userId, expiresAt);
+}
+
+function getSession(token) {
+  return db.prepare("SELECT s.*, u.username, u.display_name FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = ? AND s.expires_at > datetime('now')").get(token);
+}
+
+function deleteSession(token) {
+  db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+}
+
+function cleanExpiredSessions() {
+  db.prepare("DELETE FROM sessions WHERE expires_at <= datetime('now')").run();
+}
+
+// ─── Push Subscription Functions ──────────────────────────────────
+
+function savePushSubscription(userId, endpoint, p256dh, auth) {
+  db.prepare("INSERT OR REPLACE INTO push_subscriptions (user_id, endpoint, keys_p256dh, keys_auth) VALUES (?, ?, ?, ?)").run(userId, endpoint, p256dh, auth);
+}
+
+function getPushSubscriptions(userId) {
+  if (userId) return db.prepare("SELECT * FROM push_subscriptions WHERE user_id = ?").all(userId);
+  return db.prepare("SELECT * FROM push_subscriptions").all();
+}
+
+function deletePushSubscription(endpoint) {
+  db.prepare("DELETE FROM push_subscriptions WHERE endpoint = ?").run(endpoint);
+}

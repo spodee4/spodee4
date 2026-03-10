@@ -6,17 +6,83 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const db = require("./db");
 const ai = require("./ai");
 const mail = require("./mail");
+const auth = require("./auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "..")));
+
+// Auth middleware — protects all /api/* routes except auth endpoints
+app.use(auth.requireAuth(db));
+
+// ============================================================
+// Auth Endpoints
+// ============================================================
+
+// Check if any user exists (first-run setup)
+app.get("/api/auth/setup-check", (req, res) => {
+  const user = db.getUserByUsername("admin");
+  res.json({ needsSetup: !user, hasUsers: !!user });
+});
+
+// Register (only allowed if no users exist yet — first-run setup)
+app.post("/api/auth/register", (req, res) => {
+  try {
+    const existingUser = db.getUserByUsername("admin");
+    if (existingUser) return res.status(403).json({ error: "Setup already completed. Use login." });
+
+    const { password, displayName } = req.body;
+    if (!password || password.length < 4) return res.status(400).json({ error: "Password must be at least 4 characters" });
+
+    const hash = auth.hashPassword(password);
+    const result = db.createUser("admin", hash, displayName || "John");
+    const token = auth.createAuthSession(db, res, result.lastInsertRowid);
+
+    res.json({ ok: true, token, user: { username: "admin", displayName: displayName || "John" } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Login
+app.post("/api/auth/login", (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = db.getUserByUsername("admin");
+    if (!user) return res.status(404).json({ error: "No account set up yet" });
+
+    if (!auth.verifyPassword(password, user.password_hash)) {
+      return res.status(401).json({ error: "Wrong password" });
+    }
+
+    const token = auth.createAuthSession(db, res, user.id);
+    res.json({ ok: true, token, user: { username: user.username, displayName: user.display_name } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Logout
+app.post("/api/auth/logout", (req, res) => {
+  const token = req.cookies?.mx_session || req.headers["x-auth-token"];
+  if (token) db.deleteSession(token);
+  res.clearCookie("mx_session");
+  res.json({ ok: true });
+});
+
+// Get current user
+app.get("/api/auth/me", (req, res) => {
+  res.json({ user: req.user });
+});
 
 // ============================================================
 // Email Endpoints
@@ -862,6 +928,32 @@ app.get("/api/scheduling-rules", (req, res) => {
 });
 
 // ============================================================
+// Push Notification Endpoints
+// ============================================================
+
+app.post("/api/push/subscribe", (req, res) => {
+  try {
+    const { endpoint, keys } = req.body;
+    if (!endpoint) return res.status(400).json({ error: "Missing endpoint" });
+    const userId = req.user ? req.user.id : null;
+    db.savePushSubscription(userId, endpoint, keys?.p256dh || "", keys?.auth || "");
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/push/unsubscribe", (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (endpoint) db.deletePushSubscription(endpoint);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================
 // Snooze wakeup (check every 60 seconds)
 // ============================================================
 
@@ -879,6 +971,24 @@ setInterval(() => {
 
 db.init();
 
-app.listen(PORT, () => {
-  console.log(`Spodee server running on http://localhost:${PORT}`);
+// Clean expired sessions periodically
+setInterval(() => {
+  try { db.cleanExpiredSessions(); } catch (e) { /* */ }
+}, 3600000); // every hour
+
+// Bind to 0.0.0.0 for network access (mobile on same WiFi + deployment)
+const HOST = process.env.HOST || "0.0.0.0";
+app.listen(PORT, HOST, () => {
+  console.log(`Mx server running on http://${HOST}:${PORT}`);
+  if (HOST === "0.0.0.0") {
+    const os = require("os");
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        if (net.family === "IPv4" && !net.internal) {
+          console.log(`  Mobile access: http://${net.address}:${PORT}`);
+        }
+      }
+    }
+  }
 });

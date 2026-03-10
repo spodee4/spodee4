@@ -1,22 +1,123 @@
 // ============================================================
 // Mx — AI Chief of Staff Email Client (Native JS)
 // Frontend with API backend + offline fallback
-// All original features preserved + new Chief of Staff features
+// Auth + Mobile + Push Notifications
 // ============================================================
 
 (function () {
   "use strict";
+
+  // ---------- Auth ----------
+  let authToken = localStorage.getItem("mx_token") || null;
+
+  const loginScreen = document.getElementById("login-screen");
+  const appDiv = document.getElementById("app");
+  const loginForm = document.getElementById("login-form");
+  const loginBtn = document.getElementById("login-btn");
+  const loginError = document.getElementById("login-error");
+  const loginNameField = document.getElementById("login-setup-name");
+  const loginNameInput = document.getElementById("login-name");
+  const loginPasswordInput = document.getElementById("login-password");
+
+  async function checkAuth() {
+    try {
+      const res = await fetch("/api/auth/setup-check", { credentials: "include" });
+      const data = await res.json();
+
+      if (data.needsSetup) {
+        // First run — show setup mode
+        loginNameField.classList.remove("hidden");
+        loginBtn.textContent = "Create Account";
+        loginScreen._isSetup = true;
+      }
+
+      // Try existing session
+      const meRes = await fetch("/api/auth/me", {
+        credentials: "include",
+        headers: authToken ? { "x-auth-token": authToken } : {},
+      });
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        if (meData.user) {
+          showApp();
+          return;
+        }
+      }
+    } catch (e) {
+      // Server not available — go to local mode
+      showApp();
+      return;
+    }
+    // Show login
+    loginScreen.classList.remove("hidden");
+    appDiv.classList.add("hidden");
+  }
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    loginError.classList.add("hidden");
+    const password = loginPasswordInput.value;
+
+    try {
+      const isSetup = loginScreen._isSetup;
+      const endpoint = isSetup ? "/api/auth/register" : "/api/auth/login";
+      const body = isSetup
+        ? { password, displayName: loginNameInput.value || "John" }
+        : { password };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        loginError.textContent = data.error || "Login failed";
+        loginError.classList.remove("hidden");
+        return;
+      }
+
+      authToken = data.token;
+      localStorage.setItem("mx_token", authToken);
+      showApp();
+    } catch (err) {
+      loginError.textContent = "Server unavailable";
+      loginError.classList.remove("hidden");
+    }
+  });
+
+  function showApp() {
+    loginScreen.classList.add("hidden");
+    appDiv.classList.remove("hidden");
+    initApp();
+  }
+
+  function logout() {
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+    localStorage.removeItem("mx_token");
+    authToken = null;
+    appDiv.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
+    loginPasswordInput.value = "";
+  }
 
   // ---------- API Layer ----------
   const API_BASE = "/api";
   const api = {
     async fetch(path, opts = {}) {
       try {
+        const headers = { "Content-Type": "application/json" };
+        if (authToken) headers["x-auth-token"] = authToken;
+
         const res = await fetch(`${API_BASE}${path}`, {
-          headers: { "Content-Type": "application/json" },
+          headers,
+          credentials: "include",
           ...opts,
           body: opts.body ? JSON.stringify(opts.body) : undefined,
         });
+        if (res.status === 401) { logout(); return null; }
         if (!res.ok) throw new Error(`API ${res.status}`);
         return res.json();
       } catch (err) {
@@ -57,6 +158,12 @@
     refreshBriefing() { return this.fetch("/briefing/refresh", { method: "POST" }); },
     getMemory() { return this.fetch("/memory"); },
   };
+
+  // ---------- initApp — called after auth ----------
+  let _appInitialized = false;
+  function initApp() {
+    if (_appInitialized) return;
+    _appInitialized = true;
 
   // ---------- Sample Data (offline fallback — preserved) ----------
   const sampleEmails = [
@@ -491,6 +598,8 @@
     dom.aiResult.classList.add("hidden");
     dom.aiResult.textContent = "";
     showPanel("detail");
+    // Show detail panel on mobile
+    if (window.innerWidth <= 900) dom.detailPanel.classList.add("visible");
     updateCounts();
     renderMailList();
   }
@@ -1777,6 +1886,93 @@
   }, 30000);
 
   // ============================================================
+  // MOBILE MENU
+  // ============================================================
+  const menuBtn = document.getElementById("menu-btn");
+  const mobileComposeBtn = document.getElementById("mobile-compose-btn");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+  const sidebar = document.getElementById("sidebar");
+
+  function openSidebar() {
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.remove("hidden");
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.add("hidden");
+  }
+
+  if (menuBtn) menuBtn.addEventListener("click", openSidebar);
+  if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
+  if (mobileComposeBtn) mobileComposeBtn.addEventListener("click", () => {
+    showPanel("compose");
+    closeSidebar();
+  });
+
+  // Close sidebar when selecting a folder/view on mobile
+  dom.folders.forEach((f) => f.addEventListener("click", closeSidebar));
+  dom.viewTabs.forEach((t) => t.addEventListener("click", closeSidebar));
+  dom.triageCategories.forEach((c) => c.addEventListener("click", closeSidebar));
+
+  // Show detail panel on mobile when selecting an email
+  const origSelectEmail = selectEmail;
+  function mobileSelectEmail(id) {
+    origSelectEmail(id);
+    if (window.innerWidth <= 900) {
+      dom.detailPanel.classList.add("visible");
+    }
+  }
+  // Monkey-patch: re-bind mail list clicks handled in renderMailList
+
+  // Back button hides detail on mobile
+  const origBack = dom.backBtn.onclick;
+  dom.backBtn.addEventListener("click", () => {
+    if (window.innerWidth <= 900) {
+      dom.detailPanel.classList.remove("visible");
+    }
+  });
+
+  // ============================================================
+  // PUSH NOTIFICATIONS
+  // ============================================================
+  async function requestPushPermission() {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+      subscribeToPush();
+      return;
+    }
+    if (Notification.permission !== "denied") {
+      const result = await Notification.requestPermission();
+      if (result === "granted") subscribeToPush();
+    }
+  }
+
+  async function subscribeToPush() {
+    if (!window._swRegistration) return;
+    try {
+      let sub = await window._swRegistration.pushManager.getSubscription();
+      if (!sub) {
+        // For demo: using a placeholder VAPID key
+        // In production, generate real VAPID keys
+        sub = await window._swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: null, // Needs real VAPID key for production
+        }).catch(() => null);
+      }
+      if (sub) {
+        const keys = sub.toJSON().keys || {};
+        await api.fetch("/push/subscribe", {
+          method: "POST",
+          body: { endpoint: sub.endpoint, keys: { p256dh: keys.p256dh, auth: keys.auth } },
+        });
+      }
+    } catch (e) {
+      console.log("Push subscription not available:", e.message);
+    }
+  }
+
+  // ============================================================
   // INIT
   // ============================================================
   updateCounts();
@@ -1789,6 +1985,8 @@
     if (result) {
       state.isOnline = true;
       addAiMessage("Mx Chief of Staff online. Connected to backend.", "assistant");
+      // Request push permission after a short delay
+      setTimeout(requestPushPermission, 3000);
     } else {
       addAiMessage("Running in local mode. Start the server for full AI features.", "assistant");
     }
@@ -1796,5 +1994,12 @@
 
   // Welcome message
   addAiMessage("Good morning, John. I'm Mx, your AI Chief of Staff. Press 'b' for your morning briefing, or ask me anything.", "assistant");
+
+  } // end initApp
+
+  // ============================================================
+  // BOOT: Check auth then launch app
+  // ============================================================
+  checkAuth();
 
 })();

@@ -1314,8 +1314,11 @@ a { color: var(--primary); text-decoration: none; }
 
 /* ---------- Responsive (mobile) ---------- */
 @media (max-width: 900px) {
+  .mobile-header { display: flex; }
+
   #app {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
   #sidebar {
     position: fixed;
@@ -1324,10 +1327,15 @@ a { color: var(--primary); text-decoration: none; }
     bottom: 0;
     width: 280px;
     z-index: 200;
-    transition: left 0.2s;
+    transition: left 0.25s ease;
   }
   #sidebar.open { left: 0; }
-  #mail-list-panel { border-right: none; }
+
+  #mail-list-panel {
+    border-right: none;
+    grid-row: 2;
+  }
+
   #detail-panel {
     position: fixed;
     top: 0;
@@ -1335,15 +1343,154 @@ a { color: var(--primary); text-decoration: none; }
     width: 100%;
     height: 100%;
     z-index: 150;
-    transition: right 0.2s;
+    transition: right 0.25s ease;
+    background: var(--bg);
   }
   #detail-panel.visible { right: 0; }
+
+  /* Larger touch targets on mobile */
+  .folder { padding: 12px 10px; }
+  .icon-btn { padding: 8px 12px; font-size: 18px; min-width: 44px; min-height: 44px; }
+  .triage-cat { padding: 10px 8px; }
+  .view-tab { padding: 10px 8px; }
+
+  /* Full-width compose on mobile */
+  #compose-panel { padding: 12px; }
+  .compose-field label { width: 40px; font-size: 11px; }
+
+  /* Better mail list readability */
+  #mail-list li { padding: 14px 16px; }
+  .mail-item-from { font-size: 14px; }
+  .mail-item-subject { font-size: 14px; }
+
+  /* AI action bar scrollable on mobile */
+  .ai-action-bar { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .ai-action-btn { flex-shrink: 0; }
+
+  /* Hide desktop sidebar header (mobile has its own) */
+  .sidebar-header { padding-top: 8px; }
 }
 
 @media (min-width: 901px) and (max-width: 1200px) {
   #app {
     grid-template-columns: 240px 300px 1fr;
   }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .login-card { padding: 28px 20px; }
+  .account-switcher { gap: 2px; }
+  .account-tab { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ---------- Login Screen ---------- */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--bg);
+  padding: 20px;
+}
+
+.login-screen.hidden { display: none !important; }
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  padding: 40px 32px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.login-logo {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 28px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-field {
+  text-align: left;
+}
+
+.login-field label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: var(--radius);
+}
+
+.login-submit {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.login-submit:hover { background: var(--primary-hover); }
+
+.login-error {
+  font-size: 12px;
+  color: var(--danger);
+  text-align: center;
+}
+
+/* ---------- Mobile Header ---------- */
+.mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  grid-column: 1 / -1;
+}
+
+.mobile-header .logo {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.menu-btn {
+  font-size: 20px;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: oklch(0 0 0 / 0.5);
+  z-index: 199;
 }
 
 /* ---------- Scrollbar ---------- */
