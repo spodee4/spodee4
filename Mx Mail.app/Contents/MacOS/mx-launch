@@ -36,6 +36,9 @@ if lsof -i :"$MX_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     exit 0
 fi
 
+# Ensure data directory exists (SQLite needs it)
+mkdir -p "$MX_DIR/data"
+
 # Ensure dependencies are installed
 cd "$MX_DIR" || exit 1
 NPM=$(which npm 2>/dev/null || echo "/opt/homebrew/bin/npm")
