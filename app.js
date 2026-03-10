@@ -165,44 +165,11 @@
     if (_appInitialized) return;
     _appInitialized = true;
 
-  // ---------- Sample Data (offline fallback — preserved) ----------
-  const sampleEmails = [
-    { id: 1, from_name: "Sarah Chen", from_address: "sarah@techcorp.io", to_address: "john@akinsfreshmarkets.com", subject: "Q1 Product Roadmap Review", body: "Hi team,\n\nI wanted to share the updated Q1 product roadmap for everyone's review. We've made some significant changes based on customer feedback from last quarter.\n\nKey highlights:\n- AI-powered search is moving to priority 1\n- Mobile redesign pushed to Q2\n- New onboarding flow launching Feb 15\n- API v3 deprecation timeline extended to March\n\nPlease review the attached document and share your feedback by end of week. We'll have a final review meeting next Monday at 2pm.\n\nLet me know if you have any questions.\n\nBest,\nSarah", date: "2026-03-10T09:30:00", read: 0, starred: 1, folder: "inbox", account: "zoho-biz", category: null, ai_score: null, is_vip: false, thread_id: "thread-1" },
-    { id: 2, from_name: "GitHub", from_address: "noreply@github.com", to_address: "john@akinsfreshmarkets.com", subject: "[spodee4] Pull Request #42: Add real-time notifications", body: "@devops-bot opened a pull request in spodee4/spodee4:\n\n#42 Add real-time notifications\n\nThis PR adds WebSocket-based real-time notifications to the platform.\n\nReviewers: @sarah-chen, @mike-johnson\nLabels: feature, needs-review\nCI: All checks passing", date: "2026-03-10T08:15:00", read: 0, starred: 0, folder: "inbox", account: "zoho-biz", category: null, ai_score: null, is_vip: false },
-    { id: 3, from_name: "Mike Johnson", from_address: "mike@designlab.co", to_address: "john@akinsfreshmarkets.com", subject: "Re: Brand refresh concepts", body: "Hey!\n\nI've finished the three brand refresh concepts we discussed. Here's a quick summary:\n\nConcept A - Modern Minimal\nConcept B - Vibrant Energy\nConcept C - Trust & Clarity\n\nMy recommendation is Concept A with some warmth borrowed from C.\n\nWant to hop on a call tomorrow to walk through them?\n\nCheers,\nMike", date: "2026-03-09T16:45:00", read: 1, starred: 0, folder: "inbox", account: "zoho-biz", category: null, ai_score: null, is_vip: true, thread_id: "thread-2" },
-    { id: 4, from_name: "John Akins", from_address: "john@akinsfreshmarkets.com", to_address: "team@akinsfreshmarkets.com", subject: "Sprint planning notes - Week 11", body: "Team,\n\nHere are the notes from today's sprint planning:\n\nCompleted last sprint:\n- User authentication refactor\n- Dashboard performance optimization\n\nThis sprint's priorities:\n1. AI mail assistant integration\n2. Email template builder v2\n3. Analytics dashboard redesign\n\nThanks,\nJohn", date: "2026-03-09T11:00:00", read: 1, starred: 0, folder: "sent", account: "zoho-biz" },
-    { id: 5, from_name: "AWS", from_address: "no-reply@aws.amazon.com", to_address: "john@akinsfreshmarkets.com", subject: "Your February billing statement is ready", body: "Hello,\n\nYour AWS billing statement for February 2026 is now available.\n\nAccount: akins-production\nTotal charges: $1,247.83\n\nView your detailed billing dashboard in the AWS Console.\n\nAmazon Web Services", date: "2026-03-08T06:00:00", read: 1, starred: 1, folder: "inbox", account: "zoho-biz" },
-    { id: 6, from_name: "Indie Hackers", from_address: "digest@indiehackers.com", to_address: "john@gmail.com", subject: "Weekly Digest: Top stories from the community", body: "This week on Indie Hackers:\n\n1. How I grew my SaaS to $10K MRR\n2. The SEO strategy that tripled our traffic\n3. Why I switched from React to HTMX\n\nTo unsubscribe from this digest, click here.", date: "2026-03-07T14:00:00", read: 1, starred: 0, folder: "inbox", account: "gmail" },
-    { id: 7, from_name: "Lisa Park", from_address: "lisa@clientco.com", to_address: "john@akinsfreshmarkets.com", subject: "Re: Project timeline update", body: "Hi,\n\nThanks for the update. We're aligned on the new dates.\n\nOne thing - we're still waiting on the API documentation from your side. Could you have someone send that over by Wednesday?\n\nBest,\nLisa", date: "2026-03-09T10:20:00", read: 0, starred: 0, folder: "inbox", account: "zoho-biz", thread_id: "thread-3" },
-    { id: 8, from_name: "Stripe", from_address: "receipts@stripe.com", to_address: "john@akinsfreshmarkets.com", subject: "Your receipt from Akins Fresh Markets - $299.00", body: "Receipt from Stripe\n\nAmount: $299.00\nDate: March 7, 2026\nDescription: Pro Plan - Monthly subscription\nCard: Visa ending in 4242", date: "2026-03-07T09:00:00", read: 1, starred: 0, folder: "inbox", account: "zoho-biz" },
-    { id: 9, from_name: "Contact Form", from_address: "contact@akinsfreshmarkets.com", to_address: "info@akinsfreshmarkets.com", subject: "New inquiry from website", body: "New contact form submission:\n\nName: David Kim\nEmail: david@startup.io\nMessage: Hi, I'm interested in your enterprise plan. Can we schedule a demo call this week?\n\nSubmitted via akinsfreshmarkets.com contact form", date: "2026-03-10T07:00:00", read: 0, starred: 0, folder: "inbox", account: "zoho-web" },
-    { id: 10, from_name: "Mom", from_address: "mom@gmail.com", to_address: "john@gmail.com", subject: "Dinner Sunday?", body: "Hey sweetie,\n\nAre you free for dinner this Sunday? Dad wants to try that new Italian place on Main Street.\n\nLet me know!\nLove, Mom", date: "2026-03-09T19:30:00", read: 0, starred: 0, folder: "inbox", account: "gmail" },
-  ];
-
-  // ---------- Sample Tasks (offline) ----------
-  const sampleTasks = [
-    { id: 1, title: "Review Q1 product roadmap", priority: "high", status: "pending", due_date: "2026-03-14", assigned_to: "John", source: "Email: Q1 Product Roadmap Review" },
-    { id: 2, title: "Send API documentation to Lisa", priority: "high", status: "pending", due_date: "2026-03-12", assigned_to: "John", source: "Email: Re: Project timeline update" },
-    { id: 3, title: "Schedule demo call with David Kim", priority: "medium", status: "pending", due_date: "2026-03-14", assigned_to: "John", source: "Email: New inquiry from website" },
-    { id: 4, title: "Review brand refresh concepts with Mike", priority: "medium", status: "pending", due_date: "2026-03-11", assigned_to: "John", source: "Email: Re: Brand refresh concepts" },
-    { id: 5, title: "Review PR #42 notifications", priority: "low", status: "pending", due_date: null, assigned_to: "John", source: "Email: Pull Request #42" },
-  ];
-
-  // ---------- Sample Contacts (offline) ----------
-  const sampleContacts = [
-    { email: "sarah@techcorp.io", name: "Sarah Chen", role: "Product Manager", company: "TechCorp", relationship_score: 82, email_count: 24, last_contact: "2026-03-10T09:30:00", is_vip: 0, topics: ["roadmap", "product", "features"] },
-    { email: "mike@designlab.co", name: "Mike Johnson", role: "Creative Director", company: "DesignLab", relationship_score: 91, email_count: 45, last_contact: "2026-03-09T16:45:00", is_vip: 1, topics: ["branding", "design", "refresh"] },
-    { email: "lisa@clientco.com", name: "Lisa Park", role: "Account Manager", company: "ClientCo", relationship_score: 68, email_count: 15, last_contact: "2026-03-09T10:20:00", is_vip: 0, topics: ["project", "timeline", "API docs"] },
-    { email: "david@startup.io", name: "David Kim", role: "Founder", company: "Startup.io", relationship_score: 20, email_count: 1, last_contact: "2026-03-10T07:00:00", is_vip: 0, topics: ["enterprise", "demo"] },
-    { email: "mom@gmail.com", name: "Mom", role: "Family", company: null, relationship_score: 99, email_count: 120, last_contact: "2026-03-09T19:30:00", is_vip: 1, topics: ["family", "dinner"] },
-  ];
-
-  // ---------- Sample Calendar Events ----------
-  const sampleEvents = [
-    { id: 1, title: "Roadmap Review Meeting", date: "2026-03-10", time: "14:00", end_time: "15:00", description: "Final Q1 roadmap review with Sarah", location: null, meeting_url: null },
-    { id: 2, title: "Brand Concepts Call", date: "2026-03-11", time: "10:00", end_time: "11:00", description: "Walk through brand refresh concepts with Mike", location: null, meeting_url: null },
-    { id: 3, title: "Deep Work Block", date: "2026-03-10", time: "09:00", end_time: "11:00", description: "Protected deep work time", location: null, meeting_url: null },
-  ];
+  // ---------- No sample data — starts empty, populated from server ----------
+  const sampleEmails = [];
+  const sampleTasks = [];
+  const sampleContacts = [];
+  const sampleEvents = [];
 
 
   // ---------- Category Config (Dan Martel Email GPS — preserved) ----------
