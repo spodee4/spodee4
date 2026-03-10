@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spodee Mail — AI-Powered Email</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">Spodee Mail</h1>
+        <span class="logo-badge">AI</span>
+      </div>
+      <button id="compose-btn" class="btn-primary">+ Compose</button>
+      <nav id="folders">
+        <ul>
+          <li class="folder active" data-folder="inbox">
+            <span class="folder-icon">&#128229;</span> Inbox
+            <span class="badge" id="inbox-count">3</span>
+          </li>
+          <li class="folder" data-folder="starred">
+            <span class="folder-icon">&#9733;</span> Starred
+          </li>
+          <li class="folder" data-folder="sent">
+            <span class="folder-icon">&#9993;</span> Sent
+          </li>
+          <li class="folder" data-folder="drafts">
+            <span class="folder-icon">&#128221;</span> Drafts
+          </li>
+          <li class="folder" data-folder="trash">
+            <span class="folder-icon">&#128465;</span> Trash
+          </li>
+        </ul>
+      </nav>
+      <div class="ai-section">
+        <h3>AI Assistant</h3>
+        <div id="ai-chat">
+          <div id="ai-messages"></div>
+          <div class="ai-input-row">
+            <input type="text" id="ai-input" placeholder="Ask AI about your mail...">
+            <button id="ai-send-btn">&#9654;</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mail List -->
+    <main id="mail-list-panel">
+      <div class="mail-list-header">
+        <div class="search-bar">
+          <input type="text" id="search-input" placeholder="Search mail...">
+        </div>
+        <div class="mail-list-actions">
+          <button class="action-btn" id="refresh-btn" title="Refresh">&#8635;</button>
+          <select id="filter-select">
+            <option value="all">All Mail</option>
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
+          </select>
+        </div>
+      </div>
+      <ul id="mail-list"></ul>
+    </main>
+
+    <!-- Mail Detail / Compose -->
+    <section id="detail-panel">
+      <!-- Read view -->
+      <div id="mail-detail" class="hidden">
+        <div class="detail-header">
+          <button id="back-btn" class="action-btn">&#8592; Back</button>
+          <div class="detail-actions">
+            <button class="action-btn" id="star-btn" title="Star">&#9734;</button>
+            <button class="action-btn" id="reply-btn" title="Reply">&#8617; Reply</button>
+            <button class="action-btn" id="delete-btn" title="Delete">&#128465; Delete</button>
+          </div>
+        </div>
+        <div id="detail-content">
+          <h2 id="detail-subject"></h2>
+          <div class="detail-meta">
+            <span id="detail-from"></span>
+            <span id="detail-date"></span>
+          </div>
+          <div id="detail-body"></div>
+        </div>
+        <div id="ai-summary-bar" class="hidden">
+          <button id="ai-summarize-btn" class="btn-ai">&#10024; AI Summarize</button>
+          <button id="ai-reply-suggest-btn" class="btn-ai">&#10024; AI Suggest Reply</button>
+          <div id="ai-result" class="hidden"></div>
+        </div>
+      </div>
+
+      <!-- Compose view -->
+      <div id="compose-panel" class="hidden">
+        <div class="compose-header">
+          <h2>New Message</h2>
+          <button id="close-compose" class="action-btn">&times;</button>
+        </div>
+        <form id="compose-form">
+          <input type="email" id="compose-to" placeholder="To" required>
+          <input type="text" id="compose-subject" placeholder="Subject">
+          <div class="compose-toolbar">
+            <button type="button" class="btn-ai" id="ai-draft-btn">&#10024; AI Draft</button>
+            <button type="button" class="btn-ai" id="ai-improve-btn">&#10024; AI Improve</button>
+          </div>
+          <textarea id="compose-body" rows="12" placeholder="Write your message..."></textarea>
+          <div class="compose-actions">
+            <button type="submit" class="btn-primary">Send</button>
+            <button type="button" id="save-draft-btn" class="btn-secondary">Save Draft</button>
+            <button type="button" id="discard-btn" class="btn-secondary">Discard</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state">
+        <div class="empty-state-content">
+          <span class="empty-icon">&#9993;</span>
+          <h2>Select a message to read</h2>
+          <p>Or compose a new one to get started</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
