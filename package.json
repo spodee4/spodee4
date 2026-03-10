@@ -1,7 +1,7 @@
 {
-  "name": "mx-mail",
-  "version": "0.1.0",
-  "description": "Mx — AI-powered email client with smart triage and multi-account support",
+  "name": "massage-booking",
+  "version": "1.0.0",
+  "description": "Self-hosted massage therapist booking app — replace MassageBook",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
@@ -11,16 +11,12 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
-    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^11.6.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.0",
-    "googleapis": "^144.0.0",
-    "imap": "^0.8.19",
-    "mailparser": "^3.7.1",
+    "bcryptjs": "^3.0.3",
     "nodemailer": "^6.9.16"
   }
 }
