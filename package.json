@@ -1,0 +1,21 @@
+{
+  "name": "mx-mail",
+  "version": "0.1.0",
+  "description": "Mx — AI-powered email client with smart triage and multi-account support",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "better-sqlite3": "^11.6.0",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.16",
+    "googleapis": "^144.0.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.4.7",
+    "cors": "^2.8.5"
+  }
+}
