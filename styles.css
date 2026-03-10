@@ -1499,3 +1499,288 @@ a { color: var(--primary); text-decoration: none; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
+/* ============================================================
+   Settings / Vault View
+   ============================================================ */
+
+.vault-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.vault-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.vault-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.vault-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.vault-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.vault-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* PIN Form */
+.vault-pin-form {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.vault-pin-form p {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.vault-pin-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.vault-pin-input {
+  width: 120px;
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 4px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+}
+
+.vault-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.vault-offline {
+  padding: 12px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.vault-offline code {
+  background: var(--surface-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.vault-url {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Buttons */
+.vault-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+}
+
+.vault-btn:hover {
+  background: var(--surface-active);
+  border-color: var(--border-light);
+}
+
+.vault-btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.vault-btn.primary:hover {
+  background: var(--primary-hover);
+}
+
+.vault-btn.small {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.vault-btn.danger {
+  color: var(--danger);
+}
+
+.vault-btn.danger:hover {
+  background: oklch(0.25 0.05 25);
+}
+
+/* Credential Cards */
+.vault-category {
+  margin-bottom: 16px;
+}
+
+.vault-category-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vault-cat-count {
+  font-size: 10px;
+  background: var(--surface-hover);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.vault-cred-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  transition: border-color 0.15s;
+}
+
+.vault-cred-card:hover {
+  border-color: var(--border);
+}
+
+.vault-cred-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.vault-cred-name {
+  font-size: 13px;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+.vault-cred-notes {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.vault-cred-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.vault-cred-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* Add Form */
+.vault-add-form {
+  padding: 12px;
+  margin-bottom: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vault-input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.vault-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--ai-glow);
+  outline: none;
+}
+
+.vault-add-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.vault-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 20px 0;
+  font-size: 13px;
+}
+
+/* Settings Info */
+.settings-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.settings-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.settings-value {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vault-connected {
+  color: var(--success);
+}
+
+.vault-offline-status {
+  color: var(--warning);
+}
+

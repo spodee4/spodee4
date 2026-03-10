@@ -331,6 +331,8 @@
     calDateLabel: $("#cal-date-label"),
     calPrev: $("#cal-prev"),
     calNext: $("#cal-next"),
+    settingsView: $("#settings-view"),
+    settingsContent: $("#settings-content"),
     // Thread
     threadSummaryCard: $("#thread-summary-card"),
     threadTopic: $("#thread-topic"),
@@ -988,6 +990,7 @@
     dom.tasksView.classList.toggle("hidden", view !== "tasks");
     dom.contactsView.classList.toggle("hidden", view !== "contacts");
     dom.calendarView.classList.toggle("hidden", view !== "calendar");
+    dom.settingsView.classList.toggle("hidden", view !== "settings");
     dom.triageSection.classList.toggle("hidden", view !== "mail");
 
     dom.viewTabs.forEach(t => t.classList.toggle("active", t.dataset.view === view));
@@ -996,6 +999,7 @@
     else if (view === "tasks") renderTasks();
     else if (view === "contacts") renderContacts();
     else if (view === "calendar") renderCalendar();
+    else if (view === "settings") renderSettings();
     else { renderMailList(); }
 
     showPanel("empty");
@@ -1296,6 +1300,319 @@
         </div>
       `;
       dom.calendarEvents.appendChild(div);
+    });
+  }
+
+  // ============================================================
+  // SETTINGS / VAULT VIEW
+  // ============================================================
+
+  let vaultPin = null;
+  let vaultCredentials = [];
+
+  async function renderSettings() {
+    const container = dom.settingsContent;
+
+    // Check vault health first
+    let vaultStatus;
+    try {
+      const res = await fetch("/api/vault/health", { credentials: "include", headers: authToken ? { "x-auth-token": authToken } : {} });
+      vaultStatus = await res.json();
+    } catch (e) {
+      vaultStatus = { status: "unreachable", error: e.message };
+    }
+
+    const isConnected = vaultStatus.status === "connected";
+
+    // If not PIN-authenticated, show PIN dialog
+    if (isConnected && !vaultPin) {
+      container.innerHTML = `
+        <div class="vault-section">
+          <div class="vault-header">
+            <span class="vault-icon">&#128274;</span>
+            <div>
+              <h3>Vault</h3>
+              <p class="vault-subtitle">Connected to ${escapeHtml(vaultStatus.url || "vault")}</p>
+            </div>
+          </div>
+          <div class="vault-pin-form">
+            <p>Enter your vault PIN to manage credentials</p>
+            <div class="vault-pin-row">
+              <input type="password" id="vault-pin-input" class="vault-pin-input" placeholder="PIN" maxlength="10" autocomplete="off">
+              <button id="vault-pin-submit" class="vault-btn primary">Unlock</button>
+            </div>
+            <p id="vault-pin-error" class="vault-error hidden"></p>
+          </div>
+        </div>
+        <div class="vault-section">
+          <div class="vault-header">
+            <span class="vault-icon">&#9881;</span>
+            <h3>App Info</h3>
+          </div>
+          <div class="settings-info">
+            <div class="settings-row"><span class="settings-label">Vault</span><span class="settings-value vault-connected">Connected</span></div>
+            <div class="settings-row"><span class="settings-label">Credentials</span><span class="settings-value">${vaultStatus.total_credentials || "?"}</span></div>
+            <div class="settings-row"><span class="settings-label">Accounts</span><span class="settings-value">${state.accounts?.length || 0}</span></div>
+          </div>
+        </div>
+      `;
+
+      const pinInput = $("#vault-pin-input");
+      const pinSubmit = $("#vault-pin-submit");
+      const pinError = $("#vault-pin-error");
+
+      const submitPin = async () => {
+        const pin = pinInput.value.trim();
+        if (!pin) return;
+        pinSubmit.disabled = true;
+        pinSubmit.textContent = "Verifying...";
+        try {
+          const res = await fetch("/api/vault/verify-pin", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json", ...(authToken ? { "x-auth-token": authToken } : {}) },
+            body: JSON.stringify({ pin }),
+          });
+          if (res.ok) {
+            vaultPin = pin;
+            renderSettings();
+          } else {
+            pinError.textContent = "Invalid PIN";
+            pinError.classList.remove("hidden");
+            pinSubmit.disabled = false;
+            pinSubmit.textContent = "Unlock";
+          }
+        } catch (e) {
+          pinError.textContent = "Connection error";
+          pinError.classList.remove("hidden");
+          pinSubmit.disabled = false;
+          pinSubmit.textContent = "Unlock";
+        }
+      };
+
+      pinSubmit.addEventListener("click", submitPin);
+      pinInput.addEventListener("keydown", (e) => { if (e.key === "Enter") submitPin(); });
+      pinInput.focus();
+      return;
+    }
+
+    // If not connected, show status
+    if (!isConnected) {
+      container.innerHTML = `
+        <div class="vault-section">
+          <div class="vault-header">
+            <span class="vault-icon">&#128274;</span>
+            <div>
+              <h3>Vault</h3>
+              <p class="vault-subtitle">${vaultStatus.status === "not_configured" ? "Not configured" : "Unreachable"}</p>
+            </div>
+          </div>
+          <div class="vault-offline">
+            <p>Vault is ${vaultStatus.status === "not_configured" ? "not configured. Set <code>VAULT_URL</code> in your .env file" : "unreachable. Using environment variable fallback"}.</p>
+            ${vaultStatus.url ? `<p class="vault-url">URL: ${escapeHtml(vaultStatus.url)}</p>` : ""}
+            ${vaultStatus.error ? `<p class="vault-error">${escapeHtml(vaultStatus.error)}</p>` : ""}
+          </div>
+        </div>
+        <div class="vault-section">
+          <div class="vault-header">
+            <span class="vault-icon">&#9881;</span>
+            <h3>App Info</h3>
+          </div>
+          <div class="settings-info">
+            <div class="settings-row"><span class="settings-label">Vault</span><span class="settings-value vault-offline-status">Offline</span></div>
+            <div class="settings-row"><span class="settings-label">Mode</span><span class="settings-value">Environment Variables</span></div>
+            <div class="settings-row"><span class="settings-label">Accounts</span><span class="settings-value">${state.accounts?.length || 0}</span></div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // PIN authenticated — load and show credentials
+    try {
+      const res = await fetch("/api/vault/list", {
+        credentials: "include",
+        headers: { "x-vault-pin": vaultPin, ...(authToken ? { "x-auth-token": authToken } : {}) },
+      });
+      const data = await res.json();
+      vaultCredentials = data.credentials || data || [];
+    } catch (e) {
+      vaultCredentials = [];
+    }
+
+    // Group credentials by category
+    const groups = {};
+    for (const c of vaultCredentials) {
+      const cat = c.category || "general";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(c);
+    }
+
+    const categoryIcons = { email: "&#128231;", ai: "&#129302;", system: "&#128296;", api: "&#128279;", general: "&#128196;" };
+
+    let credHtml = "";
+    for (const [cat, creds] of Object.entries(groups)) {
+      const icon = categoryIcons[cat] || categoryIcons.general;
+      credHtml += `<div class="vault-category">
+        <div class="vault-category-header">${icon} <span>${escapeHtml(cat.charAt(0).toUpperCase() + cat.slice(1))}</span> <span class="vault-cat-count">${creds.length}</span></div>`;
+      for (const cred of creds) {
+        credHtml += `
+          <div class="vault-cred-card" data-name="${escapeHtml(cred.name)}">
+            <div class="vault-cred-info">
+              <div class="vault-cred-name">${escapeHtml(cred.name)}</div>
+              ${cred.notes ? `<div class="vault-cred-notes">${escapeHtml(cred.notes)}</div>` : ""}
+              <div class="vault-cred-meta">${cred.updated_at ? "Updated " + formatRelativeDate(cred.updated_at) : ""}</div>
+            </div>
+            <div class="vault-cred-actions">
+              <button class="vault-btn small vault-reveal-btn" data-name="${escapeHtml(cred.name)}">&#128065; Reveal</button>
+              <button class="vault-btn small danger vault-delete-btn" data-name="${escapeHtml(cred.name)}">&#128465;</button>
+            </div>
+          </div>`;
+      }
+      credHtml += "</div>";
+    }
+
+    container.innerHTML = `
+      <div class="vault-section">
+        <div class="vault-header">
+          <span class="vault-icon">&#128274;</span>
+          <div>
+            <h3>Vault</h3>
+            <p class="vault-subtitle">${vaultCredentials.length} credentials</p>
+          </div>
+          <div class="vault-header-actions">
+            <button id="vault-add-btn" class="vault-btn primary">+ Add</button>
+            <button id="vault-lock-btn" class="vault-btn">&#128274; Lock</button>
+          </div>
+        </div>
+        <div id="vault-add-form" class="vault-add-form hidden">
+          <input type="text" id="vault-add-name" placeholder="Credential name" class="vault-input">
+          <input type="text" id="vault-add-value" placeholder="Value" class="vault-input">
+          <select id="vault-add-category" class="vault-input">
+            <option value="general">General</option>
+            <option value="email">Email</option>
+            <option value="ai">AI</option>
+            <option value="api">API</option>
+            <option value="system">System</option>
+          </select>
+          <input type="text" id="vault-add-notes" placeholder="Notes (optional)" class="vault-input">
+          <div class="vault-add-actions">
+            <button id="vault-save-btn" class="vault-btn primary">Save</button>
+            <button id="vault-cancel-btn" class="vault-btn">Cancel</button>
+          </div>
+        </div>
+        <div id="vault-credentials">${credHtml || '<p class="vault-empty">No credentials stored</p>'}</div>
+      </div>
+      <div class="vault-section">
+        <div class="vault-header">
+          <span class="vault-icon">&#9881;</span>
+          <h3>App Info</h3>
+        </div>
+        <div class="settings-info">
+          <div class="settings-row"><span class="settings-label">Vault</span><span class="settings-value vault-connected">Connected</span></div>
+          <div class="settings-row"><span class="settings-label">Credentials</span><span class="settings-value">${vaultCredentials.length}</span></div>
+          <div class="settings-row"><span class="settings-label">Accounts</span><span class="settings-value">${state.accounts?.length || 0}</span></div>
+        </div>
+      </div>
+    `;
+
+    // Lock button
+    $("#vault-lock-btn").addEventListener("click", () => {
+      vaultPin = null;
+      vaultCredentials = [];
+      renderSettings();
+    });
+
+    // Add credential form toggle
+    const addForm = $("#vault-add-form");
+    $("#vault-add-btn").addEventListener("click", () => addForm.classList.toggle("hidden"));
+    $("#vault-cancel-btn").addEventListener("click", () => addForm.classList.add("hidden"));
+
+    // Save credential
+    $("#vault-save-btn").addEventListener("click", async () => {
+      const name = $("#vault-add-name").value.trim();
+      const value = $("#vault-add-value").value.trim();
+      const category = $("#vault-add-category").value;
+      const notes = $("#vault-add-notes").value.trim();
+      if (!name || !value) return;
+
+      try {
+        await fetch("/api/vault/credentials", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "x-vault-pin": vaultPin,
+            ...(authToken ? { "x-auth-token": authToken } : {}),
+          },
+          body: JSON.stringify({ name, value, category, notes }),
+        });
+        renderSettings();
+      } catch (e) {
+        alert("Failed to save: " + e.message);
+      }
+    });
+
+    // Reveal buttons
+    container.querySelectorAll(".vault-reveal-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const name = btn.dataset.name;
+        const card = btn.closest(".vault-cred-card");
+
+        if (btn._revealed) {
+          // Hide again
+          const metaEl = card.querySelector(".vault-cred-meta");
+          if (metaEl) metaEl.textContent = btn._originalMeta || "";
+          btn.innerHTML = "&#128065; Reveal";
+          btn._revealed = false;
+          return;
+        }
+
+        btn.textContent = "...";
+        try {
+          const res = await fetch(`/api/vault/credentials/${encodeURIComponent(name)}/reveal`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "x-vault-pin": vaultPin,
+              ...(authToken ? { "x-auth-token": authToken } : {}),
+            },
+          });
+          const data = await res.json();
+          const val = data.value || data.credential?.value || "(empty)";
+
+          const metaEl = card.querySelector(".vault-cred-meta");
+          btn._originalMeta = metaEl?.textContent || "";
+          if (metaEl) metaEl.textContent = val;
+          btn.innerHTML = "&#128064; Hide";
+          btn._revealed = true;
+        } catch (e) {
+          btn.innerHTML = "&#128065; Reveal";
+          alert("Reveal failed: " + e.message);
+        }
+      });
+    });
+
+    // Delete buttons
+    container.querySelectorAll(".vault-delete-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const name = btn.dataset.name;
+        if (!confirm(`Delete credential "${name}"?`)) return;
+
+        try {
+          await fetch(`/api/vault/credentials/${encodeURIComponent(name)}`, {
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+              "x-vault-pin": vaultPin,
+              ...(authToken ? { "x-auth-token": authToken } : {}),
+            },
+          });
+          renderSettings();
+        } catch (e) {
+          alert("Delete failed: " + e.message);
+        }
+      });
     });
   }
 
@@ -1870,6 +2187,7 @@
     else if (e.key === "b") switchView("briefing");
     else if (e.key === "t") switchView("tasks");
     else if (e.key === "m") switchView("mail");
+    else if (e.key === "s" || e.key === ",") switchView("settings");
   });
 
   // Snooze wake-up check (every 30s — preserved)

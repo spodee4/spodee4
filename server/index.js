@@ -12,6 +12,7 @@ const db = require("./db");
 const ai = require("./ai");
 const mail = require("./mail");
 const auth = require("./auth");
+const vault = require("./vault");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -885,11 +886,93 @@ app.get("/api/vip", (req, res) => {
 });
 
 // ============================================================
+// Vault Proxy Routes (browser → Mx server → Mac mini vault)
+// ============================================================
+
+app.get("/api/vault/health", async (req, res) => {
+  try {
+    const status = await vault.health();
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/vault/list", async (req, res) => {
+  try {
+    const pin = req.headers["x-vault-pin"] || "";
+    const data = await vault.proxyRequest("GET", "/vault/credentials", null, pin);
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.post("/api/vault/verify-pin", async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const data = await vault.proxyRequest("POST", "/vault/verify-pin", { pin }, pin);
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.post("/api/vault/credentials", async (req, res) => {
+  try {
+    const pin = req.headers["x-vault-pin"] || req.body.pin || "";
+    const data = await vault.proxyRequest("POST", "/vault/credentials", req.body, pin);
+    vault.clearCache();
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/vault/credentials/:name", async (req, res) => {
+  try {
+    const pin = req.headers["x-vault-pin"] || "";
+    const data = await vault.proxyRequest("DELETE", `/vault/credentials/${encodeURIComponent(req.params.name)}`, null, pin);
+    vault.clearCache();
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.post("/api/vault/credentials/:name/reveal", async (req, res) => {
+  try {
+    const pin = req.headers["x-vault-pin"] || "";
+    const data = await vault.proxyRequest("POST", `/vault/credentials/${encodeURIComponent(req.params.name)}/reveal`, null, pin);
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.get("/api/vault/audit", async (req, res) => {
+  try {
+    const pin = req.headers["x-vault-pin"] || "";
+    const qs = new URLSearchParams(req.query).toString();
+    const path = "/vault/audit" + (qs ? `?${qs}` : "");
+    const data = await vault.proxyRequest("GET", path, null, pin);
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+// ============================================================
 // Accounts
 // ============================================================
 
-app.get("/api/accounts", (req, res) => {
-  res.json(mail.getAccounts());
+app.get("/api/accounts", async (req, res) => {
+  try {
+    const accounts = await mail.getAccounts();
+    res.json(accounts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ============================================================
@@ -976,19 +1059,30 @@ setInterval(() => {
   try { db.cleanExpiredSessions(); } catch (e) { /* */ }
 }, 3600000); // every hour
 
-// Bind to 0.0.0.0 for network access (mobile on same WiFi + deployment)
-const HOST = process.env.HOST || "0.0.0.0";
-app.listen(PORT, HOST, () => {
-  console.log(`Mx server running on http://${HOST}:${PORT}`);
-  if (HOST === "0.0.0.0") {
-    const os = require("os");
-    const nets = os.networkInterfaces();
-    for (const name of Object.keys(nets)) {
-      for (const net of nets[name]) {
-        if (net.family === "IPv4" && !net.internal) {
-          console.log(`  Mobile access: http://${net.address}:${PORT}`);
+// Async boot: initialize vault, then start server
+(async () => {
+  // Initialize vault connection (non-blocking — falls back to env vars)
+  await vault.initVault(
+    process.env.VAULT_URL,
+    process.env.VAULT_PIN,
+    process.env.VAULT_TOKEN
+  );
+
+  // Bind to 0.0.0.0 for network access (mobile on same WiFi + deployment)
+  const HOST = process.env.HOST || "0.0.0.0";
+  app.listen(PORT, HOST, () => {
+    console.log(`Mx server running on http://${HOST}:${PORT}`);
+    console.log(`  Vault: ${vault.isAvailable() ? "connected" : "env-var fallback"}`);
+    if (HOST === "0.0.0.0") {
+      const os = require("os");
+      const nets = os.networkInterfaces();
+      for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+          if (net.family === "IPv4" && !net.internal) {
+            console.log(`  Mobile access: http://${net.address}:${PORT}`);
+          }
         }
       }
     }
-  }
-});
+  });
+})();

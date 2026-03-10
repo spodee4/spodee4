@@ -3,13 +3,28 @@
 // ============================================================
 
 const Anthropic = require("@anthropic-ai/sdk");
+const { cred } = require("./vault");
 
 let client;
-function getClient() {
-  if (!client) {
-    client = new Anthropic();
-  }
-  return client;
+let clientInitPromise = null;
+
+async function getClient() {
+  if (client) return client;
+  if (clientInitPromise) return clientInitPromise;
+
+  clientInitPromise = (async () => {
+    // Try vault first, then fall back to env var
+    const apiKey = await cred("anthropic-api-key", "ANTHROPIC_API_KEY");
+    if (apiKey) {
+      client = new Anthropic({ apiKey });
+    } else {
+      // Default constructor reads ANTHROPIC_API_KEY from env
+      client = new Anthropic();
+    }
+    return client;
+  })();
+
+  return clientInitPromise;
 }
 
 const MODEL = "claude-sonnet-4-20250514";
@@ -49,7 +64,7 @@ drafting replies, tracking commitments, surfacing what matters, and filtering no
 // Helper: call Claude and return raw text
 // ============================================================
 async function callClaude(system, userContent, maxTokens = 2000) {
-  const c = getClient();
+  const c = await getClient();
   const response = await c.messages.create({
     model: MODEL,
     max_tokens: maxTokens,

@@ -1,41 +1,46 @@
 // ============================================================
 // Mx — Email Sync Layer (IMAP + SMTP)
 // Zoho Business, Zoho Website, Gmail
+// Vault-aware: reads credentials from vault with env var fallback
 // ============================================================
 
 const Imap = require("imap");
 const { simpleParser } = require("mailparser");
 const nodemailer = require("nodemailer");
+const { cred } = require("./vault");
 
 // ---------- Account Configuration ----------
-function getAccounts() {
+async function getAccounts() {
   const accounts = [];
 
-  if (process.env.ZOHO_BIZ_USER) {
+  const zohoBizUser = await cred("mx-zoho-biz-user", "ZOHO_BIZ_USER");
+  if (zohoBizUser) {
     accounts.push({
       id: "zoho-biz",
       name: "Zoho Business",
-      email: process.env.ZOHO_BIZ_USER,
+      email: zohoBizUser,
       color: "oklch(0.7162 0.1597 290.3962)",
       type: "imap",
     });
   }
 
-  if (process.env.ZOHO_WEB_USER) {
+  const zohoWebUser = await cred("mx-zoho-web-user", "ZOHO_WEB_USER");
+  if (zohoWebUser) {
     accounts.push({
       id: "zoho-web",
       name: "Zoho Website",
-      email: process.env.ZOHO_WEB_USER,
+      email: zohoWebUser,
       color: "oklch(0.7482 0.1235 244.7492)",
       type: "imap",
     });
   }
 
-  if (process.env.GMAIL_USER) {
+  const gmailUser = await cred("mx-gmail-user", "GMAIL_USER");
+  if (gmailUser) {
     accounts.push({
       id: "gmail",
       name: "Gmail Personal",
-      email: process.env.GMAIL_USER,
+      email: gmailUser,
       color: "oklch(0.6861 0.2061 14.9941)",
       type: "gmail",
     });
@@ -44,54 +49,57 @@ function getAccounts() {
   return accounts;
 }
 
-function getAddress(accountId) {
-  const accounts = {
-    "zoho-biz": process.env.ZOHO_BIZ_USER,
-    "zoho-web": process.env.ZOHO_WEB_USER,
-    gmail: process.env.GMAIL_USER,
+async function getAddress(accountId) {
+  const map = {
+    "zoho-biz": ["mx-zoho-biz-user", "ZOHO_BIZ_USER"],
+    "zoho-web": ["mx-zoho-web-user", "ZOHO_WEB_USER"],
+    gmail: ["mx-gmail-user", "GMAIL_USER"],
   };
-  return accounts[accountId] || "";
+  const pair = map[accountId];
+  if (!pair) return "";
+  return (await cred(pair[0], pair[1])) || "";
 }
 
 // ---------- IMAP Connection Helpers ----------
-function createImapConnection(accountId) {
-  const configs = {
-    "zoho-biz": {
-      user: process.env.ZOHO_BIZ_USER,
-      password: process.env.ZOHO_BIZ_PASS,
-      host: process.env.ZOHO_BIZ_HOST || "imap.zoho.com",
-      port: parseInt(process.env.ZOHO_BIZ_PORT) || 993,
-      tls: true,
-      tlsOptions: { rejectUnauthorized: false },
-    },
-    "zoho-web": {
-      user: process.env.ZOHO_WEB_USER,
-      password: process.env.ZOHO_WEB_PASS,
-      host: process.env.ZOHO_WEB_HOST || "imap.zoho.com",
-      port: parseInt(process.env.ZOHO_WEB_PORT) || 993,
-      tls: true,
-      tlsOptions: { rejectUnauthorized: false },
-    },
-    gmail: {
-      user: process.env.GMAIL_USER,
-      password: process.env.GMAIL_PASS,
-      host: "imap.gmail.com",
-      port: 993,
-      tls: true,
-      tlsOptions: { rejectUnauthorized: false },
-      // For OAuth2, use xoauth2 token instead of password
-    },
-  };
+async function createImapConnection(accountId) {
+  let config;
 
-  const config = configs[accountId];
-  if (!config || !config.user) return null;
+  if (accountId === "zoho-biz") {
+    const user = await cred("mx-zoho-biz-user", "ZOHO_BIZ_USER");
+    const password = await cred("mx-zoho-biz-pass", "ZOHO_BIZ_PASS");
+    const host = (await cred("mx-zoho-biz-host", "ZOHO_BIZ_HOST")) || "imap.zoho.com";
+    const port = parseInt((await cred("mx-zoho-biz-port", "ZOHO_BIZ_PORT")) || "993");
+    if (!user) return null;
+    config = { user, password, host, port, tls: true, tlsOptions: { rejectUnauthorized: false } };
+  } else if (accountId === "zoho-web") {
+    const user = await cred("mx-zoho-web-user", "ZOHO_WEB_USER");
+    const password = await cred("mx-zoho-web-pass", "ZOHO_WEB_PASS");
+    const host = (await cred("mx-zoho-web-host", "ZOHO_WEB_HOST")) || "imap.zoho.com";
+    const port = parseInt((await cred("mx-zoho-web-port", "ZOHO_WEB_PORT")) || "993");
+    if (!user) return null;
+    config = { user, password, host, port, tls: true, tlsOptions: { rejectUnauthorized: false } };
+  } else if (accountId === "gmail") {
+    const user = await cred("mx-gmail-user", "GMAIL_USER");
+    const password = await cred("mx-gmail-pass", "GMAIL_PASS");
+    if (!user) return null;
+    config = { user, password, host: "imap.gmail.com", port: 993, tls: true, tlsOptions: { rejectUnauthorized: false } };
+  } else {
+    return null;
+  }
+
   return new Imap(config);
 }
 
 // ---------- Sync Emails via IMAP ----------
 function syncAccount(accountId, db) {
-  return new Promise((resolve, reject) => {
-    const imap = createImapConnection(accountId);
+  return new Promise(async (resolve, reject) => {
+    let imap;
+    try {
+      imap = await createImapConnection(accountId);
+    } catch (err) {
+      return resolve({ account: accountId, synced: 0, error: err.message });
+    }
+
     if (!imap) {
       return resolve({ account: accountId, synced: 0, error: "Not configured" });
     }
@@ -161,7 +169,7 @@ function syncAccount(accountId, db) {
 }
 
 async function syncAll(db) {
-  const accounts = getAccounts();
+  const accounts = await getAccounts();
   const results = [];
 
   for (const account of accounts) {
@@ -177,43 +185,35 @@ async function syncAll(db) {
 }
 
 // ---------- Send Email via SMTP ----------
-function createSmtpTransport(accountId) {
-  const configs = {
-    "zoho-biz": {
-      host: process.env.ZOHO_BIZ_SMTP_HOST || "smtp.zoho.com",
-      port: parseInt(process.env.ZOHO_BIZ_SMTP_PORT) || 465,
-      secure: true,
-      auth: {
-        user: process.env.ZOHO_BIZ_USER,
-        pass: process.env.ZOHO_BIZ_PASS,
-      },
-    },
-    "zoho-web": {
-      host: process.env.ZOHO_WEB_SMTP_HOST || "smtp.zoho.com",
-      port: parseInt(process.env.ZOHO_WEB_SMTP_PORT) || 465,
-      secure: true,
-      auth: {
-        user: process.env.ZOHO_WEB_USER,
-        pass: process.env.ZOHO_WEB_PASS,
-      },
-    },
-    gmail: {
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
-    },
-  };
+async function createSmtpTransport(accountId) {
+  let config;
 
-  return nodemailer.createTransport(configs[accountId]);
+  if (accountId === "zoho-biz") {
+    const host = (await cred("mx-zoho-biz-smtp-host", "ZOHO_BIZ_SMTP_HOST")) || "smtp.zoho.com";
+    const port = parseInt((await cred("mx-zoho-biz-smtp-port", "ZOHO_BIZ_SMTP_PORT")) || "465");
+    const user = await cred("mx-zoho-biz-user", "ZOHO_BIZ_USER");
+    const pass = await cred("mx-zoho-biz-pass", "ZOHO_BIZ_PASS");
+    config = { host, port, secure: true, auth: { user, pass } };
+  } else if (accountId === "zoho-web") {
+    const host = (await cred("mx-zoho-web-smtp-host", "ZOHO_WEB_SMTP_HOST")) || "smtp.zoho.com";
+    const port = parseInt((await cred("mx-zoho-web-smtp-port", "ZOHO_WEB_SMTP_PORT")) || "465");
+    const user = await cred("mx-zoho-web-user", "ZOHO_WEB_USER");
+    const pass = await cred("mx-zoho-web-pass", "ZOHO_WEB_PASS");
+    config = { host, port, secure: true, auth: { user, pass } };
+  } else if (accountId === "gmail") {
+    const user = await cred("mx-gmail-user", "GMAIL_USER");
+    const pass = await cred("mx-gmail-pass", "GMAIL_PASS");
+    config = { host: "smtp.gmail.com", port: 465, secure: true, auth: { user, pass } };
+  } else {
+    throw new Error(`Unknown account: ${accountId}`);
+  }
+
+  return nodemailer.createTransport(config);
 }
 
 async function sendEmail(accountId, { to, subject, body, attachments }) {
-  const transport = createSmtpTransport(accountId);
-  const from = getAddress(accountId);
+  const transport = await createSmtpTransport(accountId);
+  const from = await getAddress(accountId);
 
   const mailOptions = {
     from,
