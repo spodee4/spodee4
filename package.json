@@ -20,7 +20,7 @@
     "express": "^4.21.0",
     "googleapis": "^144.0.0",
     "imap": "^0.8.19",
-    "mailparser": "^3.7.1",
+    "mailparser": "^3.9.14",
     "nodemailer": "^6.9.16"
   }
 }
